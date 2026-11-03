@@ -1086,8 +1086,6 @@ const orderOverlay = document.getElementById('orderOverlay');
 const orderClose   = orderOverlay.querySelector('.order-close');
 const orderForm    = document.getElementById('orderForm');
 const fName        = document.getElementById('fName');
-const fGov         = document.getElementById('fGov');
-const fCity        = document.getElementById('fCity');
 const fAddr        = document.getElementById('fAddr');
 const qtyVal       = document.getElementById('qtyVal');
 const orderOk      = document.getElementById('orderOk');
@@ -1199,13 +1197,11 @@ function setFieldError(el, message) {
 function validateOrder() {
   const okName  = setFieldError(fName, fName.value.trim().length >= 3 ? '' : 'اكتب اسمك الكامل');
   const okPhone = checkPhone();
-  const okGov   = setFieldError(fGov,  fGov.value ? '' : 'اختر المحافظة');
-  const okCity  = setFieldError(fCity, fCity.value.trim().length >= 2 ? '' : 'اكتب اسم بلدتك أو مدينتك أو قريتك');
-  const okAddr  = setFieldError(fAddr, fAddr.value.trim().length >= 5 ? '' : 'اكتب عنوانك بالتفصيل (الحي، الشارع، أقرب نقطة دالة)');
-  return okName && okPhone && okGov && okCity && okAddr;
+  const okAddr  = setFieldError(fAddr, fAddr.value.trim().length >= 8 ? '' : 'اكتب عنوانك بالتفصيل (المحافظة، المدينة أو البلدة، الحي، الشارع)');
+  return okName && okPhone && okAddr;
 }
  
-[fName, fGov, fCity, fAddr].forEach(el =>
+[fName, fAddr].forEach(el =>
   el.addEventListener('input', () => setFieldError(el, ''))
 );
  
@@ -1239,9 +1235,7 @@ async function sendOrderToSheet(order) {
 
 function resetOrderForm() {
   fName.value = '';
-  fCity.value = '';
   fAddr.value = '';
-  fGov.selectedIndex = 0;
   orderQty = 1;
   try { input.value = ''; refresh(); } catch (e) {}   // خانة الهاتف (phone.js)
   updateTotals();
@@ -1265,8 +1259,6 @@ orderForm.addEventListener('submit', async e => {
     name:         fName.value.trim(),
     phone:        getE164(),
     phoneDisplay: getFinalPhone(),
-    governorate:  fGov.value,
-    city:         fCity.value.trim(),
     address:      fAddr.value.trim(),
     product:      els.name ? els.name.textContent.trim() : '',
     quantity:     orderQty,
@@ -1313,8 +1305,6 @@ function buildWhatsAppUrl(o) {
     '',
     'الاسم: ' + o.name,
     'الهاتف: ' + o.phoneDisplay,
-    'المحافظة: ' + o.governorate,
-    'البلد/المدينة/القرية: ' + o.city,
     'العنوان: ' + o.address,
     'الدفع: عند الاستلام'
   ];
@@ -1333,8 +1323,6 @@ function buildSmsUrl(o) {
     'الإجمالي: ' + o.totalUsd + '$',
     'الاسم: ' + o.name,
     'الهاتف: ' + o.phoneDisplay,
-    'المحافظة: ' + o.governorate,
-    'البلد/المدينة/القرية: ' + o.city,
     'العنوان: ' + o.address
   ];
   return 'sms:' + SMS_NUMBER + '?&body=' + encodeURIComponent(lines.join('\n'));

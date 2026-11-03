@@ -904,11 +904,6 @@ body.no-scroll{
     color: #ffb3b3;
 }
  
-.row-2{
-    display: flex;
-    gap: 12px;
-}
- 
 /* إطار خانة الهاتف (يبنيه phone.js) */
 .phone-wrap:focus-within{
     box-shadow: 0 0 0 1px #fff;
@@ -1093,10 +1088,6 @@ body.no-scroll{
     }
  
     .order-form h2{ font-size: 22px; }
-}
- 
-@media (max-width: 420px){
-    .row-2{ flex-direction: column; gap: 0; }
 }
  
  
