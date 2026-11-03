@@ -163,7 +163,8 @@ body{
     /* width: 40%; */
     flex: 0 1 auto;
     width: clamp(260px, 36vw, 550px);
-    height: clamp(260px, 34vw, 440px);   /* صندوق ثابت: لا يتغير حجم الصفحة مهما كانت أبعاد صورة المنتج */
+    --imgs-h: clamp(260px, 34vw, 440px);
+    height: var(--imgs-h);   /* صندوق ثابت: لا يتغير حجم الصفحة مهما كانت أبعاد صورة المنتج */
     display: flex;
     justify-content: center;
 }
@@ -373,6 +374,8 @@ body{
 
 @media (max-width: 900px){
 
+    .shamelll{ padding-bottom: 64px; }   /* مسافة بين الميزات وقسم من نحن (القسم يتداخل 28px مع نهاية الصفحة) */
+
     .safhaon{
         width: 92%;
         justify-content: flex-start;
@@ -395,7 +398,8 @@ body{
     .safhaon .imgs{
         order: 1;
         width: min(100%, 560px);
-        height: clamp(180px, 54vw, 340px);   /* صندوق ثابت أصغر: النظارات عريضة فلا نترك فراغاً كبيراً حولها */
+        --imgs-h: clamp(180px, 54vw, 340px);
+        height: var(--imgs-h);   /* صندوق ثابت أصغر: النظارات عريضة فلا نترك فراغاً كبيراً حولها */
         margin-top: 26px;                    /* مسافة بين الشريط العلوي وصورة المنتج */
     }
     .imgs img{ height: 100%; object-fit: contain; }
@@ -413,11 +417,11 @@ body{
     /* العنوان والشرح بعرض أقل من الصفحة، ملتصقان بالجهة اليمنى */
     .safhaon .text h1,
     .safhaon .text p{
-        width: 90%;
+        width: 88%;
         align-self: flex-start;
     }
 
-    .safhaon .text h1{ order: 2; margin: calc(12px - var(--trim, 20px)) 0 0; }   /* المسافة بين الصورة والعنوان: 30px تقريباً (--trim يحسبها ronq.js) */      /* المسافة بين الصورة والعنوان (قلّلها أو زِدها من هنا) */
+    .safhaon .text h1{ order: 2; margin: calc(24px - var(--trim, 20px)) 0 0; }   /* المسافة بين الصورة والعنوان: 42px تقريباً (--trim يحسبها ronq.js) */      /* المسافة بين الصورة والعنوان (قلّلها أو زِدها من هنا) */
     .safhaon .text p{ order: 3; margin: 0; font-size: 13.5px; line-height: 1.9; }
 
     /* السعر: القديم المشطوب يمين، والجديد يسار. بلا سعر قديم يبقى الجديد على اليمين */
@@ -480,7 +484,7 @@ body{
     }
     .icon img:hover{ transform: none; z-index: auto; }
 
-    .safhaon .overlay{ order: 7; margin: 20px 0; }
+    .safhaon .overlay{ order: 7; margin: 0; }
 
     .overlay ul{
         width: 100%;
@@ -498,7 +502,7 @@ body{
 
 @media (max-width: 600px){
 
-    .shamelll{ padding-bottom: 0; }
+    .shamelll{ padding-bottom: 64px; }   /* مسافة بين الميزات وقسم من نحن */
 
     .navbar{ justify-content: center; }
 
@@ -848,7 +852,8 @@ body.no-scroll{
 }
  
 .field > input,
-.field > select{
+.field > select,
+.field > textarea{
     width: 100%;
     padding: 11px 14px;
     border-radius: 12px;
@@ -860,13 +865,23 @@ body.no-scroll{
     transition: border-color 0.3s, background-color 0.3s;
 }
  
+.field > textarea{
+    display: block;
+    resize: vertical;
+    min-height: 84px;
+    max-height: 200px;
+    line-height: 1.7;
+}
+
 .field > input::placeholder,
+.field > textarea::placeholder,
 #x::placeholder{
     color: rgba(255, 255, 255, 0.55);
 }
  
 .field > input:focus,
-.field > select:focus{
+.field > select:focus,
+.field > textarea:focus{
     border-color: #fff;
     background: rgba(255, 255, 255, 0.2);
 }
@@ -877,7 +892,8 @@ body.no-scroll{
 }
  
 .field.invalid > input,
-.field.invalid > select{
+.field.invalid > select,
+.field.invalid > textarea{
     border-color: #ff9b9b;
 }
  
@@ -1001,6 +1017,19 @@ body.no-scroll{
     text-align: center;
     font-weight: 600;
     color: #c9ffd2;
+}
+
+.order-err{
+    margin-top: 12px;
+    text-align: center;
+    font-weight: 600;
+    color: #ffb3b3;
+}
+.order-err[hidden]{ display: none; }
+
+.order-submit:disabled{
+    opacity: 0.6;
+    cursor: wait;
 }
 
 .sms-fallback{
@@ -1237,3 +1266,75 @@ html.intro-pending .text button{ animation: none; }
 /* طبقة الطلب فوق خلفية فاتحة: نجعلها غامقة حتى تبقى النصوص البيضاء مقروءة */
 .maalomataltalab.tone-dark{ background: rgba(20, 26, 50, 0.82); }
 .maalomataltalab.tone-dark .order-form{ background: rgba(255, 255, 255, 0.1); }
+
+
+/* ========== معرض صور المنتج (نفس المنتج من زوايا مختلفة) ========== */
+
+.imgs{ --gal-h: 60px; }   /* مساحة صف الصور المصغّرة تحت المنتج */
+
+/* عند وجود معرض: يزيد ارتفاع الصندوق بمقدار صف الصور المصغّرة، وصورة المنتج تبقى بحجمها كما هي */
+.imgs.has-gallery{
+    height: calc(var(--imgs-h) + var(--gal-h));
+    padding-bottom: var(--gal-h);
+    touch-action: pan-y;               /* السحب الأفقي لتبديل الصورة، والعمودي للتمرير العادي */
+}
+
+.gallery{
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 2;
+    display: flex;
+    justify-content: center;
+    justify-content: safe center;
+    gap: 8px;
+    direction: ltr;                    /* الأولى يساراً ثم التالية نحو اليمين */
+    padding: 2px;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+.gallery::-webkit-scrollbar{ display: none; }
+.gallery[hidden]{ display: none; }
+
+.g-thumb{
+    flex: none;
+    width: 66px;
+    height: 44px;
+    padding: 4px;
+    border-radius: 10px;
+    cursor: pointer;
+    background-color: rgba(255, 255, 255, 0.12);
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    background-origin: content-box;
+    border: 1.5px solid rgba(255, 255, 255, 0.3);
+    opacity: 0.65;
+    transition: opacity 0.25s, border-color 0.25s, background-color 0.25s, transform 0.2s;
+}
+.g-thumb.active{
+    opacity: 1;
+    border-color: #fff;
+    background-color: rgba(255, 255, 255, 0.22);
+}
+.g-thumb:active{ transform: scale(0.94); }
+.g-thumb:focus-visible{ outline: 2px solid var(--ink, #fff); outline-offset: 2px; }
+
+@media (hover: hover){
+    .g-thumb:hover{ opacity: 1; }
+}
+
+.shamelll.light .g-thumb{
+    background-color: rgba(31, 36, 51, 0.06);
+    border-color: rgba(31, 36, 51, 0.18);
+}
+.shamelll.light .g-thumb.active{
+    border-color: var(--ink);
+    background-color: rgba(31, 36, 51, 0.1);
+}
+
+@media (max-width: 600px){
+    .imgs{ --gal-h: 54px; }
+    .g-thumb{ width: 58px; height: 40px; }
+}

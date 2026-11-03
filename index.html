@@ -60,6 +60,8 @@
                 <div class="imgs">
                     <!-- يضبطها الـ JS تلقائياً على أول منتج في products.js -->
                     <img class="asd" src="imgs/النظارة_فقط_دون_مساحات_خلفية.png" alt="المنتج">
+                    <!-- الصور المصغّرة لبقية زوايا المنتج: يملؤها الـ JS من PAGE_GALLERY في products.js، لا تضف صوراً هنا -->
+                    <div class="gallery" id="gallery" hidden></div>
                     <!-- شارة العرض: تظهر فقط للمنتجات التي فيها offer: true في products.js -->
                     <div class="offer-badge" id="offerBadge" hidden>
                         <small class="ob-label">عرض خاص</small>
@@ -299,6 +301,12 @@
                     </div>
  
                     <div class="field">
+                        <label for="fAddr">العنوان</label>
+                        <textarea id="fAddr" rows="3" autocomplete="street-address" placeholder="اكتب عنوانك بالتفصيل: الحي، الشارع، أقرب نقطة دالة، وأي ملاحظات للمندوب"></textarea>
+                        <small class="err"></small>
+                    </div>
+
+                    <div class="field">
                         <label>الكمية</label>
                         <div class="qty">
                             <!-- الأول ناقص (−) والثاني زائد (+) -->
@@ -314,8 +322,11 @@
                     </div>
  
                     <button type="submit" class="order-submit">تأكيد الطلب</button>
-                    <p class="order-ok" id="orderOk" hidden>تم تجهيز طلبك في واتساب، اضغط «إرسال» هناك لإتمامه</p>
+                    <p class="order-ok" id="orderOk" hidden>تم استلام طلبك بنجاح، سنتواصل معك قريباً لتأكيده</p>
+                    <p class="order-err" id="orderErr" hidden></p>
+                    <!-- رابط SMS البديل (معطّل مع إرسال واتساب):
                     <a class="sms-fallback" id="smsFallback" href="#" hidden>لا يعمل معك واتساب؟ أرسل الطلب برسالة SMS</a>
+                    -->
                 </form>
  
             </div>
@@ -330,4 +341,3 @@
     <script src="about.js"></script>
 </body>
 </html>
- 

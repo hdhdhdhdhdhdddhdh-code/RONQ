@@ -178,6 +178,8 @@ function updateImageGap() {
   const holder = document.querySelector('.safhaon');
   const bw = main.offsetWidth, bh = main.offsetHeight;
   if (!holder || !bw || !bh) return;
+  // مع المعرض تأتي الصور المصغّرة تحت المنتج مباشرة، فلا نرفع العنوان نحو الصورة
+  if (imgsBox.classList.contains('has-gallery')) { holder.style.setProperty('--trim', '6px'); return; }
   const imgs = products.length ? products.map(p => p.img) : [main];
   let trim = Infinity;
   imgs.forEach(im => {
@@ -441,6 +443,129 @@ main.addEventListener('load', updateGlowCenter);
 updateGlowCenter();
  
  
+/* ---------- معرض صور المنتج ----------
+   الصورة الأساسية = الصورة المكتوبة في index.html، وبقية الزوايا تُكتب في PAGE_GALLERY (products.js).
+   تظهر صور مصغّرة تحت المنتج؛ الضغط عليها أو السحب يميناً/يساراً على المنتج يبدّل الصورة بحركة ناعمة. */
+
+const imgsBox    = document.querySelector('.imgs');
+const galleryBox = document.getElementById('gallery');
+let galleryList  = [];      // [{ url }] — الأولى هي الصورة الأساسية
+let galleryIdx   = 0;       // رقم الصورة المعروضة
+let gallerySwap  = 0;       // رقم آخر عملية تبديل (لتجاهل الضغطات السريعة المتتالية)
+let galleryAnim  = null;
+
+async function setGallery(extraSrcs) {
+  if (!galleryBox || !imgsBox) return;
+  const extras = (Array.isArray(extraSrcs) ? extraSrcs : []).map(s => String(s || '').trim().replace(/^\/+/, '')).filter(Boolean);   // نحذف الشرطة الأولى إن كُتبت: '/imgs/a.png' = 'imgs/a.png'
+
+  galleryBox.replaceChildren();
+  galleryBox.hidden = true;
+  galleryList = [];
+  galleryIdx = 0;
+  // نحجز مساحة الصور المصغّرة فوراً حتى لا تقفز الصفحة بعد تحميل الصور
+  imgsBox.classList.toggle('has-gallery', extras.length > 0);
+  updateImageGap();
+  if (!extras.length) return;
+
+  const results = await Promise.allSettled([main.src, ...extras].map(loadImage));
+  const seen = new Set();
+  results.forEach(res => {
+    if (res.status !== 'fulfilled') { console.warn('تم تجاهل صورة من المعرض:', res.reason.message); return; }
+    const url = res.value.src;
+    if (seen.has(url)) return;       // إن كررتَ الصورة الأساسية لا تظهر مرتين
+    seen.add(url);
+    galleryList.push({ url });
+  });
+
+  if (galleryList.length < 2) {      // لا معنى لمعرض بصورة واحدة
+    galleryList = [];
+    imgsBox.classList.remove('has-gallery');
+    updateImageGap();
+    updateGlowCenter();
+    return;
+  }
+
+  galleryBox.replaceChildren(...galleryList.map((g, i) => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'g-thumb' + (i === 0 ? ' active' : '');
+    b.style.backgroundImage = 'url(' + JSON.stringify(g.url) + ')';
+    b.setAttribute('aria-label', 'عرض الصورة ' + (i + 1) + ' من ' + galleryList.length);
+    b.addEventListener('click', () => showGalleryImage(i));
+    return b;
+  }));
+  galleryBox.hidden = false;
+  galleryBox.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 450, easing: 'ease-out' });
+  main.draggable = false;
+  updateImageGap();
+  updateGlowCenter();
+}
+
+// dir: 1 = التالية (تخرج الصورة الحالية لليسار وتدخل الجديدة من اليمين)، -1 = السابقة
+async function showGalleryImage(i, dir) {
+  if (!galleryList[i] || i === galleryIdx) return;
+  if (dir === undefined) dir = i > galleryIdx ? 1 : -1;
+  galleryIdx = i;
+  const token = ++gallerySwap;
+
+  [...galleryBox.children].forEach((b, k) => b.classList.toggle('active', k === i));
+  // إن كان صف الصور المصغّرة أعرض من الشاشة نمرّره ليظهر المختار
+  const t = galleryBox.children[i];
+  if (t && galleryBox.scrollWidth > galleryBox.clientWidth) {
+    galleryBox.scrollTo({ left: t.offsetLeft - (galleryBox.clientWidth - t.offsetWidth) / 2, behavior: 'smooth' });
+  }
+
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const dx = reduce ? 0 : 28;
+  try {
+    if (galleryAnim) galleryAnim.cancel();
+    galleryAnim = main.animate(
+      [{ opacity: 1, translate: '0 0' }, { opacity: 0, translate: (-dir * dx) + 'px 0' }],
+      { duration: reduce ? 1 : 170, easing: 'ease-in', fill: 'forwards' }
+    );
+    await galleryAnim.finished;
+
+    main.src = galleryList[i].url;
+    try { await main.decode(); } catch (e) {}
+    if (token !== gallerySwap) return;       // ضغط المستخدم صورة أخرى أثناء الحركة: هي التي تكمل
+
+    const out = galleryAnim;
+    galleryAnim = main.animate(
+      [{ opacity: 0, translate: (dir * dx) + 'px 0' }, { opacity: 1, translate: '0 0' }],
+      { duration: reduce ? 1 : 280, easing: 'ease-out' }
+    );
+    out.cancel();
+    await galleryAnim.finished;
+  } catch (e) {
+    /* أُلغيت الحركة بضغطة أحدث */
+  } finally {
+    if (token === gallerySwap && galleryAnim) { galleryAnim.cancel(); galleryAnim = null; }
+  }
+}
+
+function stepGallery(d) {
+  if (galleryList.length < 2) return;
+  showGalleryImage((galleryIdx + d + galleryList.length) % galleryList.length, d);
+}
+
+// السحب بالإصبع (أو الماوس) على المنتج: يساراً = التالية، يميناً = السابقة
+let dragStartX = null, dragStartY = 0;
+if (imgsBox) {
+  imgsBox.addEventListener('pointerdown', e => {
+    if (galleryList.length < 2 || e.button > 0 || e.target.closest('.gallery')) return;
+    dragStartX = e.clientX;
+    dragStartY = e.clientY;
+  });
+  imgsBox.addEventListener('pointerup', e => {
+    if (dragStartX === null) return;
+    const dx = e.clientX - dragStartX, dy = e.clientY - dragStartY;
+    dragStartX = null;
+    if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy) * 1.5) stepGallery(dx < 0 ? 1 : -1);
+  });
+  imgsBox.addEventListener('pointercancel', () => { dragStartX = null; });
+}
+
+
 /* ---------- شريط الصور الصغيرة (حلقة) ---------- */
  
 // const STRIP_MS = 700;   // مدة تقدّم الصور داخل الشريط (ms)
@@ -804,6 +929,7 @@ async function initCore() {
   if (!list.length) {
     console.warn('قائمة PRODUCTS فارغة أو غير موجودة. تأكد من ملف products.js');
     applyPageOffer();   // متجر بمنتج واحد: شارة العرض من PAGE_OFFER
+    setGallery(typeof PAGE_GALLERY !== 'undefined' ? PAGE_GALLERY : []).catch(err => console.error(err));   // وصور المعرض من PAGE_GALLERY
     return;
   }
  
@@ -942,8 +1068,14 @@ async function loadRate() {
 }
 loadRate();
  
+// ===== رابط Google Sheets (تطبيق الويب Apps Script) =====
+// الصق هنا الرابط الذي يعطيك إياه Google بعد نشر الملف google-apps-script.gs (ينتهي بـ /exec).
+// خطوات الربط مكتوبة في أعلى ملف google-apps-script.gs
+const SHEET_URL = 'https://script.google.com/macros/s/AKfycbxkJPqOrFNWZExsTVN3trIWLIq5MiWVYEYmnLHMGt6hm04lGSyVjOMLxmKsCnq1GbNm/exec';
+
+// --- إرسال واتساب (معطّل: محفوظ كتعليق) ---
 // رقم واتساب الذي يستقبل الطلبات (بدون + وبدون مسافات)
-const WHATSAPP_NUMBER = '40722719456';
+// const WHATSAPP_NUMBER = '40722719456';
 
 
 
@@ -956,8 +1088,11 @@ const orderForm    = document.getElementById('orderForm');
 const fName        = document.getElementById('fName');
 const fGov         = document.getElementById('fGov');
 const fCity        = document.getElementById('fCity');
+const fAddr        = document.getElementById('fAddr');
 const qtyVal       = document.getElementById('qtyVal');
 const orderOk      = document.getElementById('orderOk');
+const orderErr     = document.getElementById('orderErr');
+const submitBtn    = orderForm.querySelector('.order-submit');
  
 let orderQty = 1;
 
@@ -968,7 +1103,8 @@ let orderQty = 1;
 function openOrder() {
   fillSummary();
   orderOk.hidden = true;
-  smsLink.hidden = true;
+  orderErr.hidden = true;
+  // smsLink.hidden = true;   // (SMS معطّل)
   orderOverlay.scrollTop = 0;
   orderOverlay.classList.add('open');
   orderOverlay.setAttribute('aria-hidden', 'false');
@@ -1065,16 +1201,108 @@ function validateOrder() {
   const okPhone = checkPhone();
   const okGov   = setFieldError(fGov,  fGov.value ? '' : 'اختر المحافظة');
   const okCity  = setFieldError(fCity, fCity.value.trim().length >= 2 ? '' : 'اكتب اسم بلدتك أو مدينتك أو قريتك');
-  return okName && okPhone && okGov && okCity;
+  const okAddr  = setFieldError(fAddr, fAddr.value.trim().length >= 5 ? '' : 'اكتب عنوانك بالتفصيل (الحي، الشارع، أقرب نقطة دالة)');
+  return okName && okPhone && okGov && okCity && okAddr;
 }
  
-[fName, fGov, fCity].forEach(el =>
+[fName, fGov, fCity, fAddr].forEach(el =>
   el.addEventListener('input', () => setFieldError(el, ''))
 );
  
  
-/* --- الإرسال إلى واتساب --- */
- 
+/* --- الإرسال إلى Google Sheets --- */
+
+let sending = false;
+
+function showOrderError(msg) {
+  orderOk.hidden = true;
+  orderErr.textContent = msg;
+  orderErr.hidden = false;
+}
+
+// نرسل الطلب كنص JSON بطلب POST (text/plain حتى لا يحتاج فحصاً مسبقاً CORS) إلى تطبيق الويب (Apps Script)
+// ونقرأ ردّه: لا نعدّ الطلب ناجحاً إلا إذا ردّ الجدول {"ok":true}. أي رد آخر (صفحة تسجيل دخول، خطأ في الكود...) يُعدّ فشلاً.
+async function sendOrderToSheet(order) {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 20000);
+  try {
+    const res = await fetch(SHEET_URL, { method: 'POST', body: JSON.stringify(order), signal: ctrl.signal });
+    let data = null;
+    try { data = await res.json(); } catch (e) {}
+    if (!data || data.ok !== true) {
+      throw new Error(data && data.error ? data.error : 'ردّ غير متوقع من الرابط (تأكد من النشر: Anyone، ومن أنه رابط /exec)');
+    }
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+function resetOrderForm() {
+  fName.value = '';
+  fCity.value = '';
+  fAddr.value = '';
+  fGov.selectedIndex = 0;
+  orderQty = 1;
+  try { input.value = ''; refresh(); } catch (e) {}   // خانة الهاتف (phone.js)
+  updateTotals();
+}
+
+orderForm.addEventListener('submit', async e => {
+  e.preventDefault();
+  if (sending || !validateOrder()) return;
+
+  orderOk.hidden = true;
+  orderErr.hidden = true;
+
+  if (!SHEET_URL) {
+    console.error('SHEET_URL فارغ في ronq.js: الصق رابط تطبيق الويب (Apps Script) الذي ينتهي بـ /exec');
+    showOrderError('الموقع غير مربوط بجدول الطلبات بعد. تواصل مع صاحب المتجر.');
+    return;
+  }
+
+  const usd = totalUsd();
+  const order = {
+    name:         fName.value.trim(),
+    phone:        getE164(),
+    phoneDisplay: getFinalPhone(),
+    governorate:  fGov.value,
+    city:         fCity.value.trim(),
+    address:      fAddr.value.trim(),
+    product:      els.name ? els.name.textContent.trim() : '',
+    quantity:     orderQty,
+    totalUsd:     usd,
+    totalSyp:     Math.round(usd * USD_TO_SYP),
+    rate:         USD_TO_SYP
+  };
+
+  sending = true;
+  submitBtn.disabled = true;
+  const label = submitBtn.textContent;
+  submitBtn.textContent = 'جاري الإرسال...';
+
+  try {
+    await sendOrderToSheet(order);
+    orderOk.hidden = false;
+    resetOrderForm();
+  } catch (err) {
+    console.error('تعذّر إرسال الطلب:', err);
+    showOrderError('تعذّر تسجيل الطلب، حاول مرة أخرى بعد قليل أو تواصل معنا عبر واتساب.');
+  } finally {
+    sending = false;
+    submitBtn.disabled = false;
+    submitBtn.textContent = label;
+  }
+});
+
+
+/* =====================================================================
+   إرسال الطلب عبر واتساب و SMS — معطّل ومحفوظ كتعليق
+   لإعادته: احذف علامتَي التعليق (السطر الذي يلي هذا التعليق وآخر سطر في الملف) حول هذه الكتلة، وأعد تفعيل السطر
+   const WHATSAPP_NUMBER في الأعلى، وأعد سطر smsLink.hidden = true في openOrder،
+   وأزل التعليق عن <a id="smsFallback"> في index.html، ثم اجعل معالج submit
+   يستدعي buildWhatsAppUrl(order) بدل sendOrderToSheet.
+   ===================================================================== */
+/*
 function buildWhatsAppUrl(o) {
   const lines = [
     '',
@@ -1087,6 +1315,7 @@ function buildWhatsAppUrl(o) {
     'الهاتف: ' + o.phoneDisplay,
     'المحافظة: ' + o.governorate,
     'البلد/المدينة/القرية: ' + o.city,
+    'العنوان: ' + o.address,
     'الدفع: عند الاستلام'
   ];
   return 'https://wa.me/' + WHATSAPP_NUMBER + '?text=' + encodeURIComponent(lines.join('\n'));
@@ -1105,40 +1334,22 @@ function buildSmsUrl(o) {
     'الاسم: ' + o.name,
     'الهاتف: ' + o.phoneDisplay,
     'المحافظة: ' + o.governorate,
-    'البلد/المدينة/القرية: ' + o.city
+    'البلد/المدينة/القرية: ' + o.city,
+    'العنوان: ' + o.address
   ];
   return 'sms:' + SMS_NUMBER + '?&body=' + encodeURIComponent(lines.join('\n'));
 }
 
 const smsLink  = document.getElementById('smsFallback');
 const isMobile = window.matchMedia('(pointer: coarse)').matches;   // الروابط sms: لا تعمل على الحاسوب
- 
-orderForm.addEventListener('submit', e => {
-  e.preventDefault();
-  if (!validateOrder()) return;
- 
-  const usd = totalUsd();
-  const order = {
-    name:         fName.value.trim(),
-    phone:        getE164(),
-    phoneDisplay: getFinalPhone(),
-    governorate:  fGov.value,
-    city:         fCity.value.trim(),
-    product:      els.name ? els.name.textContent.trim() : '',
-    quantity:     orderQty,
-    totalUsd:     usd,
-    totalSyp:     Math.round(usd * USD_TO_SYP)
-  };
- 
 
-
-  const url = buildWhatsAppUrl(order);
-  const w = window.open(url, '_blank');
-  if (!w) window.location.href = url;   // إن منع المتصفح النافذة الجديدة
- 
-  orderOk.hidden = false;
-    if (isMobile) {
-    smsLink.href = buildSmsUrl(order);
-    smsLink.hidden = false;
-  }
-});
+// داخل معالج submit بدل sendOrderToSheet:
+//   const url = buildWhatsAppUrl(order);
+//   const w = window.open(url, '_blank');
+//   if (!w) window.location.href = url;   // إن منع المتصفح النافذة الجديدة
+//   orderOk.hidden = false;
+//   if (isMobile) {
+//     smsLink.href = buildSmsUrl(order);
+//     smsLink.hidden = false;
+//   }
+*/
