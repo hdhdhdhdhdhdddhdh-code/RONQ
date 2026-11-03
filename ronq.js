@@ -1071,7 +1071,7 @@ loadRate();
 // ===== رابط Google Sheets (تطبيق الويب Apps Script) =====
 // الصق هنا الرابط الذي يعطيك إياه Google بعد نشر الملف google-apps-script.gs (ينتهي بـ /exec).
 // خطوات الربط مكتوبة في أعلى ملف google-apps-script.gs
-const SHEET_URL = 'https://script.google.com/macros/s/AKfycbxkJPqOrFNWZExsTVN3trIWLIq5MiWVYEYmnLHMGt6hm04lGSyVjOMLxmKsCnq1GbNm/exec';
+const SHEET_URL = 'https://script.google.com/macros/s/AKfycbz0vNw17CbnxR3p7xGs77ZwuFfBw1e94n9ItKVHNo3leDQLeMXjhUuZl_M45-3tzmBk/exec';
 
 // --- إرسال واتساب (معطّل: محفوظ كتعليق) ---
 // رقم واتساب الذي يستقبل الطلبات (بدون + وبدون مسافات)
