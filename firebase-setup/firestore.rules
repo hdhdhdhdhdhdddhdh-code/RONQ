@@ -1,0 +1,35 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isEditor() {
+      return request.auth != null
+        && exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+        && get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.enabled == true;
+    }
+
+    match /admins/{uid} {
+      // Admin permissions are created ONLY in the Firebase Console by the owner.
+      allow get: if request.auth != null && request.auth.uid == uid;
+      allow list, create, update, delete: if false;
+    }
+    match /products/{productId} {
+      // Public visitors see only published items; editors can manage drafts.
+      allow get, list: if (resource.data.published == true) || isEditor();
+      allow create, update: if isEditor()
+        && request.resource.data.name is string
+        && request.resource.data.name.size() > 0
+        && request.resource.data.name.size() <= 200
+        && request.resource.data.price is number
+        && request.resource.data.price >= 0
+        && request.resource.data.published is bool
+        && request.resource.data.images is list
+        && request.resource.data.images.size() <= 8;
+      allow delete: if isEditor();
+    }
+    match /storeSettings/{settingId} {
+      allow get: if settingId == 'catalog';
+      allow list: if false;
+      allow create, update, delete: if settingId == 'catalog' && isEditor();
+    }
+  }
+}

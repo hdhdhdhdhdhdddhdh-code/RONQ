@@ -270,10 +270,34 @@
                         <input id="x">
                     </div>
  
-                    <div class="field">
-                        <label for="fAddr">العنوان بالتفصيل</label>
-                        <textarea id="fAddr" rows="3" autocomplete="street-address" placeholder="اكتب المحافظة والمدينة أو القرية والحي والشارع وأقرب نقطة دالة، وأي ملاحظات للمندوب"></textarea>
-                        <small class="err"></small>
+                    <!-- المحافظة (قائمة منسدلة) بجانب العنوان بالتفصيل -->
+                    <div class="field-row">
+                        <div class="field field-gov">
+                            <label for="fGov">المحافظة</label>
+                            <select id="fGov" autocomplete="address-level1">
+                                <option value="" selected disabled>اختر</option>
+                                <option>دمشق</option>
+                                <option>ريف دمشق</option>
+                                <option>حلب</option>
+                                <option>حمص</option>
+                                <option>حماة</option>
+                                <option>اللاذقية</option>
+                                <option>طرطوس</option>
+                                <option>إدلب</option>
+                                <option>دير الزور</option>
+                                <option>الرقة</option>
+                                <option>الحسكة</option>
+                                <option>درعا</option>
+                                <option>السويداء</option>
+                                <option>القنيطرة</option>
+                            </select>
+                            <small class="err"></small>
+                        </div>
+                        <div class="field field-addr">
+                            <label for="fAddr">العنوان بالتفصيل</label>
+                            <textarea id="fAddr" rows="3" autocomplete="street-address" placeholder="المدينة أو القرية، الحي، الشارع، أقرب نقطة دالة"></textarea>
+                            <small class="err"></small>
+                        </div>
                     </div>
 
                     <div class="field">
@@ -291,6 +315,8 @@
                         <div><span>الإجمالي بالليرة السورية</span><strong id="totSyp">0 ل.س</strong></div>
                     </div>
  
+                    <p class="rate-note" id="rateNote"></p>
+
                     <button type="submit" class="order-submit">تأكيد الطلب</button>
                     <p class="order-ok" id="orderOk" hidden>تم استلام طلبك بنجاح، سنتواصل معك قريباً لتأكيده</p>
                     <p class="order-err" id="orderErr" hidden></p>
@@ -304,8 +330,10 @@
     </div>
 </div>
  
-    <!-- الترتيب مهم: products.js ثم phone.js ثم ronq.js ثم about.js -->
+    <!-- الترتيب مهم: config.js ثم products.js ثم store.js ثم phone.js ثم ronq.js ثم about.js -->
+    <script src="config.js"></script>
     <script src="products.js"></script>
+    <script src="store.js"></script>
     <script src="phone.js"></script>
     <script src="ronq.js"></script>
     <script src="about.js"></script>

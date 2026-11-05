@@ -1003,6 +1003,11 @@ async function playIntro() {
 }
 
 async function init() {
+  // بيانات المنتج من لوحة التحكم (store.js): إن لم تتوفر تبقى الصفحة كما هي
+  try {
+    const sp = window.STORE_READY ? await window.STORE_READY : null;
+    if (sp && window.applyStoreProduct) await window.applyStoreProduct(sp);
+  } catch (err) { console.error(err); }
   try { await initCore(); } catch (err) { console.error(err); }
   await hideLoader();
   await playIntro();
@@ -1025,11 +1030,18 @@ const FALLBACK_USD_TO_SYP = 14330;
 const RATE_API_URL = 'https://lirascope.syria-cloud.sy/api/v1/rates/latest?currencies=USD&lang=en';
 const OLD_PER_NEW  = 100;     // الليرة الجديدة = 100 قديمة (الـ API يعطي الجديدة)
 let   USD_TO_SYP = FALLBACK_USD_TO_SYP;
+let   rateSource = '';
+try {   // آخر سعر ناجح محفوظ (أدق من الرقم الاحتياطي إن تعذّر الاتصال)
+  const saved = JSON.parse(localStorage.getItem('ronqRate') || 'null');
+  if (saved && saved.r > 1000 && saved.r < 1000000 && Date.now() - saved.t < 7 * 24 * 3600 * 1000) USD_TO_SYP = saved.r;
+} catch (e) {}
 const MAX_QTY    = 10;
 
 function acceptRate(r, source) {
   if (isFinite(r) && r > 1000 && r < 1000000) {   // نتجاهل أي قيمة غير منطقية
     USD_TO_SYP = r;
+    try { localStorage.setItem('ronqRate', JSON.stringify({ r, t: Date.now() })); } catch (e) {}   // آخر سعر ناجح
+    rateSource = source;
     if (typeof updateTotals === 'function') updateTotals();
     return true;
   }
@@ -1037,11 +1049,11 @@ function acceptRate(r, source) {
   return false;
 }
 
-async function fetchJson(url, timeoutMs) {
+async function fetchJson(url, timeoutMs, headers) {
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), timeoutMs);
   try {
-    const res = await fetch(url, { cache: 'no-store', signal: ctrl.signal });
+    const res = await fetch(url, { cache: 'no-store', signal: ctrl.signal, headers: headers || {} });
     if (!res.ok) throw new Error('HTTP ' + res.status);
     return await res.json();
   } finally {
@@ -1050,23 +1062,56 @@ async function fetchJson(url, timeoutMs) {
 }
 
 async function loadRate() {
-  // 1) LiraScope: سعر مبيع السوق للدولار بالليرة الجديدة ثم نحوّله للقديمة
+  const cfg  = (typeof STORE_CONFIG !== 'undefined' && STORE_CONFIG) || {};
+  const base = String(cfg.SUPABASE_URL || '').replace(/\/+$/, '');
+  const key  = cfg.SUPABASE_ANON_KEY || '';
+  const auth = { apikey: key };
+
+  // 1) دالة Supabase (rate): تجلب السعر الحي من جهة الخادم فلا يحجبها المتصفح
+  if (base && key) {
+    try {
+      const d = await fetchJson(base + '/functions/v1/rate', 6000, auth);
+      if (acceptRate(Number(d.rate), 'auto')) return;
+    } catch (err) {
+      console.warn('تعذّر جلب السعر من دالة Supabase:', err.message);
+    }
+  }
+  // 2) LiraScope مباشرة (قد يحجبها المتصفح)
   try {
     const data = await fetchJson(RATE_API_URL, 5000);
     const usd = (data.marketRates || []).find(x => x.currency === 'USD');
-    if (usd && acceptRate(Math.round(Number(usd.sell) * OLD_PER_NEW), 'LiraScope')) return;
+    if (usd && acceptRate(Math.round(Number(usd.sell) * OLD_PER_NEW), 'auto')) return;
   } catch (err) {
-    console.warn('تعذّر الاتصال بـ LiraScope، جاري استخدام rates.json:', err.message);
+    console.warn('تعذّر الاتصال بـ LiraScope:', err.message);
   }
-  // 2) rates.json
+  // 3) السعر اليدوي الذي كتبه المشرف في لوحة التحكم
+  if (base && key) {
+    try {
+      const rows = await fetchJson(base + '/rest/v1/settings?select=value&key=eq.usd_rate_manual&limit=1', 5000, auth);
+      if (rows[0] && acceptRate(Number(rows[0].value), 'manual')) return;
+    } catch (err) {
+      console.warn('تعذّر قراءة السعر اليدوي:', err.message);
+    }
+  }
+  // 4) rates.json
   try {
     const data = await fetchJson('rates.json?t=' + Date.now(), 5000);
     if (acceptRate(Number(data.usdToSyp), 'rates.json')) return;
   } catch (err) {
-    console.warn('تعذّر قراءة rates.json، سيُستخدم السعر الاحتياطي:', err.message);
+    console.warn('تعذّر قراءة rates.json، سيُستخدم آخر سعر محفوظ أو الاحتياطي:', err.message);
   }
 }
 loadRate();
+
+// تحديث السعر أثناء بقاء الصفحة مفتوحة: كل 5 دقائق، وعند العودة للتبويب، وعند فتح نافذة الطلب
+let rateFetchedAt = Date.now();
+function refreshRate(minGapMs) {
+  if (Date.now() - rateFetchedAt < minGapMs) return;
+  rateFetchedAt = Date.now();
+  loadRate();
+}
+setInterval(() => refreshRate(0), 5 * 60 * 1000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) refreshRate(60 * 1000); });
  
 // ===== رابط Google Sheets (تطبيق الويب Apps Script) =====
 // الصق هنا الرابط الذي يعطيك إياه Google بعد نشر الملف google-apps-script.gs (ينتهي بـ /exec).
@@ -1086,6 +1131,7 @@ const orderOverlay = document.getElementById('orderOverlay');
 const orderClose   = orderOverlay.querySelector('.order-close');
 const orderForm    = document.getElementById('orderForm');
 const fName        = document.getElementById('fName');
+const fGov         = document.getElementById('fGov');
 const fAddr        = document.getElementById('fAddr');
 const qtyVal       = document.getElementById('qtyVal');
 const orderOk      = document.getElementById('orderOk');
@@ -1099,6 +1145,7 @@ let orderQty = 1;
 /* --- فتح وإغلاق --- */
  
 function openOrder() {
+  refreshRate(30 * 1000);   // سعر محدّث عند فتح نافذة الطلب
   fillSummary();
   orderOk.hidden = true;
   orderErr.hidden = true;
@@ -1175,6 +1222,8 @@ function updateTotals() {
   qtyVal.textContent = orderQty;
   document.getElementById('totUsd').textContent = usd.toLocaleString('en-US') + '$';
   document.getElementById('totSyp').textContent = syp.toLocaleString('en-US') + ' ل.س';
+  const rn = document.getElementById('rateNote');
+  if (rn) rn.textContent = 'سعر الصرف المعتمد: 1$ = ' + Math.round(USD_TO_SYP).toLocaleString('en-US') + ' ل.س' + (rateSource === 'manual' ? ' (سعر محدّد من المتجر)' : '');
 }
  
 document.getElementById('qtyMinus').addEventListener('click', () => {
@@ -1197,13 +1246,20 @@ function setFieldError(el, message) {
 function validateOrder() {
   const okName  = setFieldError(fName, fName.value.trim().length >= 3 ? '' : 'اكتب اسمك الكامل');
   const okPhone = checkPhone();
-  const okAddr  = setFieldError(fAddr, fAddr.value.trim().length >= 8 ? '' : 'اكتب عنوانك بالتفصيل (المحافظة، المدينة أو البلدة، الحي، الشارع)');
-  return okName && okPhone && okAddr;
+  const okGov   = setFieldError(fGov, fGov.value ? '' : 'اختر المحافظة');
+  const okAddr  = setFieldError(fAddr, fAddr.value.trim().length >= 8 ? '' : 'اكتب عنوانك بالتفصيل (المدينة أو القرية، الحي، الشارع)');
+  const all = okName && okPhone && okGov && okAddr;
+  if (!all) {   // ننزل إلى أول حقل فيه خطأ (مفيد في الجوال حيث النموذج طويل)
+    const first = !okName ? fName : !okPhone ? document.getElementById('x') : !okGov ? fGov : fAddr;
+    first.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  }
+  return all;
 }
- 
-[fName, fAddr].forEach(el =>
-  el.addEventListener('input', () => setFieldError(el, ''))
-);
+
+[fName, fGov, fAddr].forEach(el => {
+  el.addEventListener('input', () => setFieldError(el, ''));
+  el.addEventListener('change', () => setFieldError(el, ''));
+});
  
  
 /* --- الإرسال إلى Google Sheets --- */
@@ -1235,6 +1291,7 @@ async function sendOrderToSheet(order) {
 
 function resetOrderForm() {
   fName.value = '';
+  fGov.value = '';
   fAddr.value = '';
   orderQty = 1;
   try { input.value = ''; refresh(); } catch (e) {}   // خانة الهاتف (phone.js)
@@ -1259,6 +1316,7 @@ orderForm.addEventListener('submit', async e => {
     name:         fName.value.trim(),
     phone:        getE164(),
     phoneDisplay: getFinalPhone(),
+    governorate: fGov.value,
     address:      fAddr.value.trim(),
     product:      els.name ? els.name.textContent.trim() : '',
     quantity:     orderQty,
@@ -1305,6 +1363,7 @@ function buildWhatsAppUrl(o) {
     '',
     'الاسم: ' + o.name,
     'الهاتف: ' + o.phoneDisplay,
+    'المحافظة: ' + o.governorate,
     'العنوان: ' + o.address,
     'الدفع: عند الاستلام'
   ];

@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>لوحة التحكم — RONQ</title>
+    <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+
+<!-- إعدادات ناقصة -->
+<main class="center-card" id="setupView" hidden>
+    <h1>الربط غير مكتمل</h1>
+    <p>افتح الملف <b dir="ltr">config.js</b> وضع رابط مشروع Supabase والمفتاح العام، كما في ملف <b dir="ltr">SETUP.md</b>.</p>
+</main>
+
+<!-- تسجيل الدخول -->
+<main class="center-card" id="loginView" hidden>
+    <div class="brand">RONQ</div>
+    <h1>لوحة التحكم</h1>
+    <form id="loginForm" novalidate>
+        <label for="lEmail">البريد الإلكتروني</label>
+        <input id="lEmail" type="email" autocomplete="username" dir="ltr" required>
+        <label for="lPass">كلمة المرور</label>
+        <input id="lPass" type="password" autocomplete="current-password" dir="ltr" required>
+        <p class="msg err" id="loginErr" hidden></p>
+        <button class="btn primary block" type="submit" id="loginBtn">دخول</button>
+    </form>
+</main>
+
+<!-- التطبيق -->
+<div id="appView" hidden>
+    <header class="topbar">
+        <div class="brand">RONQ <small>لوحة التحكم</small></div>
+        <div class="top-actions">
+            <a class="btn ghost" href="index.html" target="_blank" rel="noopener">فتح الموقع</a>
+            <button class="btn ghost" id="logoutBtn" type="button">خروج</button>
+        </div>
+    </header>
+
+    <!-- قائمة المنتجات -->
+    <section class="wrap" id="listView">
+        <div class="bar">
+            <h2>المنتجات</h2>
+            <button class="btn primary" id="addBtn" type="button">+ إضافة منتج</button>
+        </div>
+        <p class="hint">المنتج «الرئيسي» هو الذي يظهر عند فتح الموقع. ولكل منتج رابط خاص به يصلح للإعلانات.</p>
+        <div class="grid" id="productList"></div>
+        <p class="empty" id="emptyMsg" hidden>لا توجد منتجات بعد. اضغط «إضافة منتج» لبدء البيع. وإلى أن تضيف منتجاً تبقى الصفحة تعرض المنتج المكتوب في index.html.</p>
+    </section>
+
+    <!-- نموذج الإضافة والتعديل -->
+    <section class="wrap" id="editView" hidden>
+        <div class="bar">
+            <h2 id="editTitle">منتج جديد</h2>
+            <button class="btn ghost" id="backBtn" type="button">رجوع</button>
+        </div>
+
+        <form id="productForm" class="panel" novalidate>
+
+            <h3>الصور <small>الأولى هي الصورة الرئيسية، والبقية تظهر كزوايا أخرى للمنتج</small></h3>
+            <div class="images" id="imageList"></div>
+            <label class="btn ghost upload" for="fileInput">+ رفع صور (يمكن اختيار عدة صور)</label>
+            <input id="fileInput" type="file" accept="image/png,image/jpeg,image/webp" multiple hidden>
+            <p class="hint">الأفضل PNG بخلفية شفافة ومقاسات متقاربة لكل الزوايا. تُصغَّر الصور الكبيرة تلقائياً.</p>
+            <p class="msg err" id="imgErr" hidden></p>
+
+            <h3>البيانات</h3>
+            <div class="f">
+                <label for="pName">اسم المنتج (العنوان الكبير)</label>
+                <input id="pName" maxlength="140">
+            </div>
+            <div class="f">
+                <label for="pDesc">الشرح</label>
+                <textarea id="pDesc" rows="3" maxlength="500"></textarea>
+            </div>
+            <div class="row">
+                <div class="f">
+                    <label for="pPrice">السعر بالدولار ($)</label>
+                    <input id="pPrice" type="text" inputmode="decimal" autocomplete="off" dir="ltr" placeholder="20">
+                </div>
+                <div class="f">
+                    <label for="pOld">السعر القديم المشطوب (اختياري)</label>
+                    <input id="pOld" type="text" inputmode="decimal" autocomplete="off" dir="ltr" placeholder="25">
+                </div>
+            </div>
+
+            <h3>الميزات <small>تظهر كقائمة تحت السعر</small></h3>
+            <div id="featureList"></div>
+            <button class="btn ghost" id="addFeature" type="button">+ ميزة</button>
+
+            <h3>العرض الخاص <small>شارة أعلى المنتج، اتركها فارغة لإلغائه</small></h3>
+            <div class="row">
+                <div class="f">
+                    <label for="pOfferText">نص العرض</label>
+                    <input id="pOfferText" maxlength="40" placeholder="مثال: خصم 20%">
+                </div>
+                <div class="f">
+                    <label for="pOfferLabel">العنوان الصغير</label>
+                    <input id="pOfferLabel" maxlength="30" placeholder="عرض خاص">
+                </div>
+            </div>
+
+            <h3>ألوان الصفحة</h3>
+            <div class="colors">
+                <label class="radio"><input type="radio" name="colorMode" value="default" checked> الافتراضي (أبيض فاتح هادئ)</label>
+                <label class="radio"><input type="radio" name="colorMode" value="custom"> ألوان مخصصة</label>
+            </div>
+            <div class="swatches" id="swatches"></div>
+            <div class="row" id="customColors" hidden>
+                <div class="f">
+                    <label for="pGlow">لون التوهج (الوسط)</label>
+                    <input id="pGlow" type="color" value="#1a6fff">
+                </div>
+                <div class="f">
+                    <label for="pBase">لون الأطراف</label>
+                    <input id="pBase" type="color" value="#0000c8">
+                </div>
+            </div>
+            <div class="preview" id="colorPreview" hidden></div>
+
+            <h3>النشر</h3>
+            <div class="f">
+                <label for="pSlug">رابط المنتج <small>حروف إنجليزية صغيرة وأرقام وشرطة</small></label>
+                <input id="pSlug" dir="ltr" maxlength="60" placeholder="sunglasses-1">
+                <small class="hint" dir="ltr" id="slugHint"></small>
+            </div>
+            <label class="check"><input type="checkbox" id="pPublished" checked> منشور (ظاهر للزوار)</label>
+            <label class="check"><input type="checkbox" id="pFeatured"> المنتج الرئيسي (يظهر عند فتح الموقع)</label>
+
+            <p class="msg err" id="formErr" hidden></p>
+            <div class="actions">
+                <button class="btn primary" id="saveBtn" type="submit">حفظ</button>
+                <button class="btn ghost" id="cancelBtn" type="button">إلغاء</button>
+            </div>
+        </form>
+    </section>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="config.js"></script>
+<script src="admin.js"></script>
+</body>
+</html>

@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>RONQ | لوحة إدارة المنتجات</title>
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+  <header class="header">
+    <div class="brand"><div class="brand-mark">R</div><div><strong>RONQ</strong><small>إدارة المتجر</small></div></div>
+    <div class="header-actions"><a href="index.html" target="_blank" rel="noopener noreferrer" class="ghost">عرض المتجر</a><button id="logoutBtn" class="ghost" type="button" hidden>تسجيل الخروج</button></div>
+  </header>
+  <main class="container">
+    <div class="section-title"><p class="eyebrow">لوحة خاصة بالمحرّر المصرّح له</p><h1>إدارة منتجات رونق</h1><p>أضف منتجًا جديدًا، عدّل الصور والأسعار والألوان، أو أخفِ منتجًا عن الزوار دون حذفه.</p></div>
+    <p id="globalMessage" class="notice" role="status" aria-live="polite" hidden></p>
+    <section id="configGate" class="auth-card" hidden>
+      <span class="auth-icon">⚙</span><h2>اللوحة جاهزة للربط</h2>
+      <p>يجب أولًا إعداد Firebase ووضع إعدادات المشروع في <code>firebase-config.js</code>، ثم تفعيل البريد وكلمة المرور والصلاحيات. راجع ملف التعليمات المرفق.</p>
+    </section>
+    <section id="authGate" class="auth-card" hidden>
+      <span class="auth-icon">✦</span><h2>دخول المسؤول</h2>
+      <p>سجّل دخولك باستخدام الحساب الذي منحك صاحب المتجر صلاحية تحرير المنتجات.</p>
+      <form id="loginForm" class="login-form">
+        <label>البريد الإلكتروني<input id="loginEmail" type="email" autocomplete="username" required placeholder="name@example.com"></label>
+        <label>كلمة المرور<input id="loginPassword" type="password" autocomplete="current-password" required placeholder="••••••••"></label>
+        <button id="loginSubmit" class="primary" type="submit">تسجيل الدخول</button>
+      </form>
+      <p class="helper">لا توجد إمكانية إنشاء حساب من هذه الصفحة. يضيف المالك المستخدمين من لوحة Firebase فقط.</p>
+    </section>
+    <section id="editor" class="workspace" hidden>
+      <aside class="sidebar">
+        <div class="sidebar-top"><div><p class="eyebrow">الكتالوج</p><h2>المنتجات</h2></div><button type="button" id="newBtn" class="small-primary">+ جديد</button></div>
+        <div class="search"><input id="searchProducts" type="search" placeholder="ابحث عن منتج..." aria-label="بحث في المنتجات"></div>
+        <button type="button" id="importLegacyBtn" class="import-legacy">استيراد بيانات المنتج الحالي من الصفحة</button>
+        <div id="productList" class="product-list" aria-live="polite"></div>
+        <p class="sidebar-foot">المنتج غير المنشور يظل محفوظًا ولكنه لا يظهر في المتجر.</p>
+      </aside>
+      <section class="edit-panel">
+        <div class="panel-heading"><div><p class="eyebrow" id="editModeLabel">منتج جديد</p><h2 id="editTitle">إضافة منتج</h2></div><span id="editBadge" class="state">مسودة</span></div>
+        <form id="productForm">
+          <div class="form-grid">
+            <label class="span-2">اسم المنتج *<input id="pName" maxlength="200" required placeholder="نظارة شمسية رجالية ..."></label>
+            <label class="span-2">وصف المنتج<textarea id="pDesc" rows="3" placeholder="وصف قصير وواضح للمنتج"></textarea></label>
+            <label>السعر الجديد بالدولار *<input id="pPrice" type="number" min="0" step="0.01" required placeholder="20"></label>
+            <label>السعر القديم بالدولار (اختياري)<input id="pOldPrice" type="number" min="0" step="0.01" placeholder="25"></label>
+            <label class="span-2">ميزات المنتج (كل ميزة في سطر)<textarea id="pFeatures" rows="5" placeholder="إطار خفيف\nعدسات داكنة\nتصميم أنيق"></textarea></label>
+          </div>
+          <h3 class="subheading">صور المنتج</h3>
+          <p class="helper">أول صورة هي الرئيسية. أضف حتى 8 صور، ويمكنك حذف أي صورة من القائمة قبل حفظ المنتج.</p>
+          <div id="photoList" class="photo-list"></div>
+          <div class="media-actions">
+            <label class="upload-label">رفع صور PNG / JPG / WEBP <input id="uploadFiles" type="file" accept="image/png,image/jpeg,image/webp" multiple></label>
+            <span class="muted">يتطلب رفع الصور تفعيل Firebase Storage</span>
+          </div>
+          <div class="url-add"><input id="newImageUrl" type="text" placeholder="أو الصق رابط صورة https://... أو imgs/photo.png"><button id="addImageUrl" class="ghost-dark" type="button">إضافة الرابط</button></div>
+          <div class="form-grid top-gap">
+            <label>لون التوهج / مركز الخلفية<div class="color-line"><input id="pGlow" type="color" value="#ffffff"><span id="glowHex">#ffffff</span></div></label>
+            <label>لون أطراف الخلفية<div class="color-line"><input id="pBase" type="color" value="#dbe4f1"><span id="baseHex">#dbe4f1</span></div></label>
+            <label>ترتيب العرض<input id="pSortOrder" type="number" step="1" value="0"></label>
+            <label class="check-field"><input id="pPublished" type="checkbox" checked><span>نشر المنتج للزوار</span></label>
+            <label class="check-field"><input id="pOffer" type="checkbox"><span>تفعيل شارة العرض</span></label>
+            <label>عنوان الشارة<input id="pOfferLabel" value="عرض خاص"></label>
+            <label class="span-2">نص العرض<input id="pOfferText" placeholder="خصم 20%"></label>
+          </div>
+          <div class="form-actions"><button id="saveBtn" type="submit" class="primary">حفظ المنتج</button><button id="deleteBtn" type="button" class="danger" hidden>حذف المنتج</button><button id="resetBtn" type="button" class="ghost-dark">إلغاء التعديلات</button></div>
+        </form>
+      </section>
+    </section>
+  </main>
+  <script src="firebase-config.js"></script>
+  <script type="module" src="admin.js"></script>
+</body>
+</html>
