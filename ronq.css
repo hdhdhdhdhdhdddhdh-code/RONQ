@@ -126,12 +126,14 @@ body{
 
 /* اليمين: النص — العمودان الجانبيان متساويان ليبقى المنتج في منتصف الشاشة أفقياً */
 .text{
-    flex: 1 1 0;
-    min-width: 0;
+    /* flex: 1 1 0;
+    min-width: 0; */
+    width: 28%;
 }
 .maizat{
-    flex: 1 1 0;
-    min-width: 0;
+    /* flex: 1 1 0;
+    min-width: 0; */
+    width: 25%;
 }
 
 .text h1{
