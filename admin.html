@@ -39,112 +39,237 @@
         </div>
     </header>
 
-    <!-- قائمة المنتجات -->
-    <section class="wrap" id="listView">
-        <div class="bar">
-            <h2>المنتجات</h2>
-            <button class="btn primary" id="addBtn" type="button">+ إضافة منتج</button>
-        </div>
-        <p class="hint">المنتج «الرئيسي» هو الذي يظهر عند فتح الموقع. ولكل منتج رابط خاص به يصلح للإعلانات.</p>
-        <div class="grid" id="productList"></div>
-        <p class="empty" id="emptyMsg" hidden>لا توجد منتجات بعد. اضغط «إضافة منتج» لبدء البيع. وإلى أن تضيف منتجاً تبقى الصفحة تعرض المنتج المكتوب في index.html.</p>
+    <nav class="tabs" role="tablist" aria-label="أقسام لوحة التحكم">
+        <button class="tab on" type="button" role="tab" data-tab="home">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg>
+            <span>الصفحة الرئيسية</span>
+        </button>
+        <button class="tab" type="button" role="tab" data-tab="about">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6"/><path d="M12 7.5v.01"/></svg>
+            <span>من نحن</span>
+        </button>
+        <button class="tab" type="button" role="tab" data-tab="footer">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 15h18"/></svg>
+            <span>الفوتر</span>
+        </button>
+    </nav>
 
-        <div class="panel rate-card">
-            <h3 style="margin-top:14px">سعر صرف الدولار</h3>
-            <p class="hint">الموقع يجلب السعر تلقائياً. إن تعذّر الجلب يستخدم السعر الذي تكتبه هنا (بالليرة السورية القديمة).</p>
-            <p class="live" id="liveRate">السعر التلقائي الآن: ...</p>
-            <div class="rate-row">
-                <input id="rateInput" type="text" inputmode="numeric" autocomplete="off" dir="ltr" placeholder="14400" aria-label="السعر اليدوي">
-                <button class="btn primary" id="rateSave" type="button">حفظ السعر اليدوي</button>
+
+    <!-- ============ القسم الأول: الصفحة الرئيسية ============ -->
+    <section class="wrap pane" id="tab-home">
+
+        <!-- قائمة المنتجات -->
+        <div id="listView">
+            <div class="card-block">
+                <div class="bar">
+                    <div>
+                        <h2>المنتجات</h2>
+                        <p class="hint">كل المنتجات المنشورة تظهر في الشريط السفلي للموقع. المنتج «الرئيسي» يظهر أولاً عند فتح الموقع، وترتيبهم في الشريط كترتيبهم هنا.</p>
+                    </div>
+                    <button class="btn primary" id="addBtn" type="button">+ إضافة منتج</button>
+                </div>
+                <div class="grid" id="productList"></div>
+                <p class="empty" id="emptyMsg" hidden>لا توجد منتجات بعد. اضغط «إضافة منتج» لبدء البيع. وإلى أن تضيف منتجاً تبقى الصفحة تعرض المنتج المكتوب في index.html.</p>
             </div>
+
+            <div class="card-block">
+                <h2>روابط التواصل</h2>
+                <p class="hint">تظهر كأيقونات في صفحة المنتجات وفي الفوتر. اترك الخانة فارغة لإخفاء أيقونتها.</p>
+                <div class="socials" id="socialList"></div>
+                <label for="hContact">رابط زر «تواصل معنا» <small>في الشريط العلوي والفوتر</small></label>
+                <input id="hContact" dir="ltr" placeholder="https://wa.me/963933123456">
+                <p class="msg err" id="homeErr" hidden></p>
+                <div class="actions"><button class="btn primary" id="homeSave" type="button">حفظ الروابط</button></div>
+            </div>
+
+            <div class="card-block rate-card">
+                <h2>سعر صرف الدولار</h2>
+                <p class="hint">الموقع يجلب السعر تلقائياً. إن تعذّر الجلب يستخدم السعر الذي تكتبه هنا (بالليرة السورية القديمة).</p>
+                <p class="live" id="liveRate">السعر التلقائي الآن: ...</p>
+                <div class="rate-row">
+                    <input id="rateInput" type="text" inputmode="numeric" autocomplete="off" dir="ltr" placeholder="14400" aria-label="السعر اليدوي">
+                    <button class="btn primary" id="rateSave" type="button">حفظ السعر اليدوي</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- نموذج إضافة وتعديل منتج -->
+        <div id="editView" hidden>
+            <div class="bar">
+                <h2 id="editTitle">منتج جديد</h2>
+                <button class="btn ghost" id="backBtn" type="button">رجوع</button>
+            </div>
+
+            <form id="productForm" class="panel" novalidate>
+
+                <h3>الصور <small>الأولى هي الرئيسية، والبقية زوايا أخرى للمنتج يتنقل بينها الزائر</small></h3>
+                <div class="images" id="imageList"></div>
+                <label class="drop" id="drop" for="fileInput">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4"/><path d="M7 9l5-5 5 5"/><path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></svg>
+                    <b>اضغط لرفع صور المنتج</b>
+                    <span>أو اسحبها وأفلتها هنا (يمكن اختيار عدة صور)</span>
+                </label>
+                <input id="fileInput" type="file" accept="image/png,image/jpeg,image/webp" multiple hidden>
+                <p class="hint">الأفضل PNG بخلفية شفافة ومقاسات متقاربة لكل الزوايا. تُصغَّر الصور الكبيرة تلقائياً. استخدم الأسهم لترتيبها.</p>
+                <p class="msg err" id="imgErr" hidden></p>
+
+                <h3>البيانات</h3>
+                <div class="f">
+                    <label for="pName">اسم المنتج (العنوان الكبير)</label>
+                    <input id="pName" maxlength="140">
+                </div>
+                <div class="f">
+                    <label for="pDesc">الشرح</label>
+                    <textarea id="pDesc" rows="3" maxlength="500"></textarea>
+                </div>
+                <div class="row">
+                    <div class="f">
+                        <label for="pPrice">السعر بالدولار ($)</label>
+                        <input id="pPrice" type="text" inputmode="decimal" autocomplete="off" dir="ltr" placeholder="20">
+                    </div>
+                    <div class="f">
+                        <label for="pOld">السعر القديم المشطوب (اختياري)</label>
+                        <input id="pOld" type="text" inputmode="decimal" autocomplete="off" dir="ltr" placeholder="25">
+                    </div>
+                </div>
+
+                <h3>الميزات <small>تظهر كقائمة تحت السعر</small></h3>
+                <div id="featureList"></div>
+                <button class="btn ghost" id="addFeature" type="button">+ ميزة</button>
+
+                <h3>العرض الخاص <small>شارة أعلى المنتج، اتركها فارغة لإلغائه</small></h3>
+                <div class="row">
+                    <div class="f">
+                        <label for="pOfferText">نص العرض</label>
+                        <input id="pOfferText" maxlength="40" placeholder="مثال: خصم 20%">
+                    </div>
+                    <div class="f">
+                        <label for="pOfferLabel">العنوان الصغير</label>
+                        <input id="pOfferLabel" maxlength="30" placeholder="عرض خاص">
+                    </div>
+                </div>
+
+                <h3>ألوان الصفحة <small>تتبدل الخلفية بهذه الألوان عند عرض المنتج</small></h3>
+                <div class="colors">
+                    <label class="radio"><input type="radio" name="colorMode" value="default" checked> تلقائي (ألوان فاتحة هادئة)</label>
+                    <label class="radio"><input type="radio" name="colorMode" value="custom"> ألوان مخصصة</label>
+                </div>
+                <div class="swatches" id="swatches"></div>
+                <div class="row" id="customColors" hidden>
+                    <div class="f">
+                        <label for="pGlow">لون التوهج (الوسط)</label>
+                        <input id="pGlow" type="color" value="#1a6fff">
+                    </div>
+                    <div class="f">
+                        <label for="pBase">لون الأطراف</label>
+                        <input id="pBase" type="color" value="#0000c8">
+                    </div>
+                </div>
+                <div class="preview" id="colorPreview" hidden></div>
+
+                <h3>النشر</h3>
+                <div class="f">
+                    <label for="pSlug">رابط المنتج <small>حروف إنجليزية صغيرة وأرقام وشرطة</small></label>
+                    <input id="pSlug" dir="ltr" maxlength="60" placeholder="sunglasses-1">
+                    <small class="hint" dir="ltr" id="slugHint"></small>
+                </div>
+                <label class="check"><input type="checkbox" id="pPublished" checked> منشور (ظاهر للزوار)</label>
+                <label class="check"><input type="checkbox" id="pFeatured"> المنتج الرئيسي (يظهر أولاً عند فتح الموقع)</label>
+
+                <p class="msg err" id="formErr" hidden></p>
+                <div class="actions">
+                    <button class="btn primary" id="saveBtn" type="submit">حفظ المنتج</button>
+                    <button class="btn ghost" id="cancelBtn" type="button">إلغاء</button>
+                </div>
+            </form>
         </div>
     </section>
 
-    <!-- نموذج الإضافة والتعديل -->
-    <section class="wrap" id="editView" hidden>
+
+    <!-- ============ القسم الثاني: من نحن ============ -->
+    <section class="wrap pane" id="tab-about" hidden>
         <div class="bar">
-            <h2 id="editTitle">منتج جديد</h2>
-            <button class="btn ghost" id="backBtn" type="button">رجوع</button>
+            <div>
+                <h2>قسم «من نحن»</h2>
+                <p class="hint">تحكّم كامل بصورة القسم ونصوصه وألوانه. المعاينة تتحدّث أثناء الكتابة، ولا يظهر التغيير في الموقع إلا بعد «حفظ».</p>
+            </div>
+            <button class="btn ghost" id="aboutReset" type="button">استعادة الافتراضي</button>
         </div>
 
-        <form id="productForm" class="panel" novalidate>
-
-            <h3>الصور <small>الأولى هي الصورة الرئيسية، والبقية تظهر كزوايا أخرى للمنتج</small></h3>
-            <div class="images" id="imageList"></div>
-            <label class="btn ghost upload" for="fileInput">+ رفع صور (يمكن اختيار عدة صور)</label>
-            <input id="fileInput" type="file" accept="image/png,image/jpeg,image/webp" multiple hidden>
-            <p class="hint">الأفضل PNG بخلفية شفافة ومقاسات متقاربة لكل الزوايا. تُصغَّر الصور الكبيرة تلقائياً.</p>
-            <p class="msg err" id="imgErr" hidden></p>
-
-            <h3>البيانات</h3>
-            <div class="f">
-                <label for="pName">اسم المنتج (العنوان الكبير)</label>
-                <input id="pName" maxlength="140">
-            </div>
-            <div class="f">
-                <label for="pDesc">الشرح</label>
-                <textarea id="pDesc" rows="3" maxlength="500"></textarea>
-            </div>
-            <div class="row">
-                <div class="f">
-                    <label for="pPrice">السعر بالدولار ($)</label>
-                    <input id="pPrice" type="text" inputmode="decimal" autocomplete="off" dir="ltr" placeholder="20">
+        <div class="about-edit">
+            <div class="col">
+                <div class="card-block">
+                    <h3>الصورة</h3>
+                    <div class="about-img">
+                        <div class="pic"><img id="aImg" alt=""></div>
+                        <div>
+                            <label class="btn ghost" for="aImgFile">تغيير الصورة</label>
+                            <input id="aImgFile" type="file" accept="image/png,image/jpeg,image/webp" hidden>
+                            <p class="hint">يفضّل صورة طولية (نسبة 4:5). تُصغَّر تلقائياً.</p>
+                            <p class="msg err" id="aImgErr" hidden></p>
+                        </div>
+                    </div>
                 </div>
-                <div class="f">
-                    <label for="pOld">السعر القديم المشطوب (اختياري)</label>
-                    <input id="pOld" type="text" inputmode="decimal" autocomplete="off" dir="ltr" placeholder="25">
-                </div>
-            </div>
 
-            <h3>الميزات <small>تظهر كقائمة تحت السعر</small></h3>
-            <div id="featureList"></div>
-            <button class="btn ghost" id="addFeature" type="button">+ ميزة</button>
-
-            <h3>العرض الخاص <small>شارة أعلى المنتج، اتركها فارغة لإلغائه</small></h3>
-            <div class="row">
-                <div class="f">
-                    <label for="pOfferText">نص العرض</label>
-                    <input id="pOfferText" maxlength="40" placeholder="مثال: خصم 20%">
+                <div class="card-block">
+                    <h3>النصوص</h3>
+                    <div class="row">
+                        <div class="f"><label for="aTag">الشارة الصغيرة</label><input id="aTag" maxlength="30"></div>
+                        <div class="f"><label for="aBrand">اسم العلامة</label><input id="aBrand" maxlength="30" dir="ltr"></div>
+                    </div>
+                    <div class="f"><label for="aTitle1">العنوان الكبير</label><input id="aTitle1" maxlength="60"></div>
+                    <div class="f"><label for="aTitle2">العنوان الثانوي</label><input id="aTitle2" maxlength="90"></div>
+                    <div class="f"><label for="aDesc">الشرح</label><textarea id="aDesc" rows="4" maxlength="700"></textarea></div>
                 </div>
-                <div class="f">
-                    <label for="pOfferLabel">العنوان الصغير</label>
-                    <input id="pOfferLabel" maxlength="30" placeholder="عرض خاص">
+
+                <div class="card-block">
+                    <h3>المميزات <small>أيقوناتها تتكرر تلقائياً</small></h3>
+                    <div id="aFeatures"></div>
+                    <button class="btn ghost" id="aAddFeature" type="button">+ ميزة</button>
+                </div>
+
+                <div class="card-block">
+                    <h3>العدادات</h3>
+                    <label class="check"><input type="checkbox" id="aShowCounters" checked> إظهار العدادات</label>
+                    <div id="aCounters"></div>
                 </div>
             </div>
 
-            <h3>ألوان الصفحة</h3>
-            <div class="colors">
-                <label class="radio"><input type="radio" name="colorMode" value="default" checked> الافتراضي (أبيض فاتح هادئ)</label>
-                <label class="radio"><input type="radio" name="colorMode" value="custom"> ألوان مخصصة</label>
-            </div>
-            <div class="swatches" id="swatches"></div>
-            <div class="row" id="customColors" hidden>
-                <div class="f">
-                    <label for="pGlow">لون التوهج (الوسط)</label>
-                    <input id="pGlow" type="color" value="#1a6fff">
+            <div class="col">
+                <div class="card-block">
+                    <h3>الألوان <small>«تلقائي» = يتبع لون المنتج المعروض</small></h3>
+                    <div class="colorfields" id="aColors"></div>
                 </div>
-                <div class="f">
-                    <label for="pBase">لون الأطراف</label>
-                    <input id="pBase" type="color" value="#0000c8">
+                <div class="card-block sticky">
+                    <h3>معاينة</h3>
+                    <div class="ab-preview" id="abPreview">
+                        <span class="chip" id="pvTag"></span>
+                        <div class="pv-brand" id="pvBrand"></div>
+                        <div class="pv-t1" id="pvT1"></div>
+                        <div class="pv-t2" id="pvT2"></div>
+                        <p class="pv-desc" id="pvDesc"></p>
+                        <div class="pv-feat"><b id="pvFT"></b><span id="pvFX"></span></div>
+                    </div>
                 </div>
             </div>
-            <div class="preview" id="colorPreview" hidden></div>
+        </div>
 
-            <h3>النشر</h3>
-            <div class="f">
-                <label for="pSlug">رابط المنتج <small>حروف إنجليزية صغيرة وأرقام وشرطة</small></label>
-                <input id="pSlug" dir="ltr" maxlength="60" placeholder="sunglasses-1">
-                <small class="hint" dir="ltr" id="slugHint"></small>
-            </div>
-            <label class="check"><input type="checkbox" id="pPublished" checked> منشور (ظاهر للزوار)</label>
-            <label class="check"><input type="checkbox" id="pFeatured"> المنتج الرئيسي (يظهر عند فتح الموقع)</label>
+        <p class="msg err" id="aboutErr" hidden></p>
+        <div class="actions"><button class="btn primary" id="aboutSave" type="button">حفظ قسم «من نحن»</button></div>
+    </section>
 
-            <p class="msg err" id="formErr" hidden></p>
-            <div class="actions">
-                <button class="btn primary" id="saveBtn" type="submit">حفظ</button>
-                <button class="btn ghost" id="cancelBtn" type="button">إلغاء</button>
-            </div>
-        </form>
+
+    <!-- ============ القسم الثالث: الفوتر ============ -->
+    <section class="wrap pane" id="tab-footer" hidden>
+        <div class="card-block">
+            <h2>الفوتر</h2>
+            <p class="hint">العبارة التي تظهر في أسفل الموقع قبل «جميع الحقوق محفوظة».</p>
+            <label for="fText">العبارة السفلية</label>
+            <textarea id="fText" rows="3" maxlength="300"></textarea>
+            <div class="ft-preview"><p id="fPreview"></p><p class="rights">© 2026 RONQ. جميع الحقوق محفوظة.</p></div>
+            <p class="msg err" id="footerErr" hidden></p>
+            <div class="actions"><button class="btn primary" id="footerSave" type="button">حفظ الفوتر</button></div>
+        </div>
     </section>
 </div>
 

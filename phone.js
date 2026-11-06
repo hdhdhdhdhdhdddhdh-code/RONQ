@@ -1,5 +1,5 @@
 const input = document.getElementById('x');
- 
+
 /* =====================================================
    قائمة الدول: رمز الدولة (ISO) : مفتاح الاتصال
    أسماء الدول بالعربية تأتي من المتصفح تلقائياً (Intl.DisplayNames)
@@ -23,20 +23,20 @@ const COUNTRY_DATA =
   'SK:421,SI:386,SB:677,SO:252,ZA:27,KR:82,SS:211,ES:34,LK:94,SD:249,SR:597,SE:46,CH:41,TW:886,TJ:992,' +
   'TZ:255,TH:66,TL:670,TG:228,TK:690,TO:676,TT:1868,TN:216,TM:993,TC:1649,TV:688,UG:256,UA:380,GB:44,' +
   'US:1,UY:598,UZ:998,VU:678,VA:39,VE:58,VN:84,VI:1340,WF:681,YE:967,ZM:260,ZW:263';
- 
+
 // دول تظهر في أول القائمة قبل بقية الدول
 const PINNED = ['SY', 'TR', 'LB', 'JO', 'IQ', 'SA', 'AE', 'QA', 'KW', 'EG', 'DE'];
- 
+
 function flagEmoji(iso) {
   return String.fromCodePoint(...[...iso].map(ch => 0x1F1E6 + ch.charCodeAt(0) - 65));
 }
- 
+
 function makeNames(lang) {
   try { return new Intl.DisplayNames([lang], { type: 'region' }); } catch (e) { return null; }
 }
 const namesAr = makeNames('ar');
 const namesEn = makeNames('en');
- 
+
 const countries = COUNTRY_DATA.split(',').map(s => {
   const [iso, code] = s.split(':');
   return {
@@ -51,13 +51,13 @@ const pinned = PINNED.map(i => byIso[i]).filter(Boolean);
 const others = countries
   .filter(c => !PINNED.includes(c.iso))
   .sort((a, b) => a.ar.localeCompare(b.ar, 'ar'));
- 
- 
+
+
 /* ---------- الإطار: [ علم ▾ + رمز الدولة ] [ رقم الهاتف ] ---------- */
- 
+
 const box = document.createElement('div');
 box.style.cssText = 'position:relative;';
- 
+
 // لون الإطار الطبيعي، ويتحول للأحمر عند الخطأ
 const BORDER_OK = 'rgba(255,255,255,.3)';
 
@@ -66,11 +66,11 @@ wrapper.className = 'phone-wrap';
 wrapper.dir = 'ltr';
 wrapper.style.cssText =
   'display:flex;align-items:center;border:1px solid ' + BORDER_OK + ';border-radius:12px;overflow:hidden;background:rgba(255,255,255,.12);';
- 
+
 const prefix = document.createElement('div');
 prefix.style.cssText =
   'display:flex;align-items:center;padding:0 8px 0 4px;background:rgba(255,255,255,.15);color:#fff;align-self:stretch;border-right:1px solid rgba(255,255,255,.3);font-size:16px;';
- 
+
 // زر القائمة: علم الدولة + سهم
 const pickBtn = document.createElement('button');
 pickBtn.type = 'button';
@@ -85,10 +85,10 @@ const caret = document.createElement('span');
 caret.textContent = '▾';
 caret.style.cssText = 'font-size:12px;opacity:.7;transition:transform .2s;';
 pickBtn.append(flagEl, caret);
- 
+
 const plus = document.createElement('span');
 plus.textContent = '+';
- 
+
 const code = document.createElement('input');
 code.type = 'tel';
 code.inputMode = 'numeric';
@@ -98,59 +98,59 @@ code.readOnly = true;
 code.setAttribute('aria-label', 'رمز الدولة');
 code.style.cssText =
   'width:3ch;border:0;outline:none;background:transparent;font-size:16px;color:inherit;padding:10px 0;';
- 
+
 prefix.append(pickBtn, plus, code);
- 
+
 input.parentNode.insertBefore(box, input);
 box.appendChild(wrapper);
 wrapper.append(prefix, input);
- 
+
 input.type = 'tel';
 input.inputMode = 'numeric';
 input.placeholder = '933 123 456';
 input.dir = 'ltr';
 input.style.cssText = 'flex:1;border:0;outline:none;padding:11px 10px;font-size:16px;min-width:0;background:transparent;color:#fff;';
- 
- 
+
+
 /* ---------- رسالة الخطأ ---------- */
- 
+
 const msg = document.createElement('small');
 msg.style.cssText = 'color:#ffb3b3;display:block;margin-top:4px;font-size:13px;';
 box.appendChild(msg);
- 
- 
+
+
 /* ---------- القائمة المنسدلة للدول ---------- */
- 
+
 const panel = document.createElement('div');
 panel.hidden = true;
 panel.dir = 'rtl';
 panel.style.cssText =
   'position:absolute;left:0;right:0;z-index:1000;background:#fff;color:#222;border:1px solid #ccc;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.18);overflow:hidden;';
- 
+
 const search = document.createElement('input');
 search.type = 'search';
 search.placeholder = 'ابحث عن دولة أو رمز';
 search.setAttribute('aria-label', 'بحث عن دولة');
 search.style.cssText =
   'display:block;width:100%;border:0;border-bottom:1px solid #e5e5e5;outline:none;padding:10px 12px;font-size:15px;box-sizing:border-box;';
- 
+
 const list = document.createElement('div');
 list.setAttribute('role', 'listbox');
 list.style.cssText = 'max-height:min(260px,45vh);overflow-y:auto;overscroll-behavior:contain;';
- 
+
 panel.append(search, list);
 box.appendChild(panel);
- 
+
 let selectedIso = 'SY';
 let visible = [];      // العناصر الظاهرة حالياً: { el, c }
 let activeIdx = -1;
- 
+
 function normQuery(s) {
   return toLatinDigits(s) && /^[\d+\s]+$/.test(s.trim())
     ? toLatinDigits(s)
     : s.trim().toLowerCase();
 }
- 
+
 function makeItem(c) {
   const el = document.createElement('div');
   el.setAttribute('role', 'option');
@@ -171,18 +171,18 @@ function makeItem(c) {
   el.addEventListener('click', () => selectCountry(c));
   return el;
 }
- 
+
 function renderList(q) {
   list.replaceChildren();
   visible = [];
   const query = q ? normQuery(q) : '';
- 
+
   const add = (arr) => arr.forEach(c => {
     const el = makeItem(c);
     list.appendChild(el);
     visible.push({ el, c });
   });
- 
+
   if (!query) {
     add(pinned);
     const sep = document.createElement('div');
@@ -203,7 +203,7 @@ function renderList(q) {
       list.appendChild(none);
     }
   }
- 
+
   // نحدد الدولة المختارة حالياً
   visible.forEach(v => {
     const on = v.c.iso === selectedIso;
@@ -213,13 +213,13 @@ function renderList(q) {
   const cur = visible.findIndex(v => v.c.iso === selectedIso);
   setActive(cur >= 0 ? cur : (visible.length ? 0 : -1), true);
 }
- 
+
 function setActive(i, scroll) {
   visible.forEach((v, k) => { v.el.style.background = k === i ? '#eef4ff' : ''; });
   activeIdx = i;
   if (scroll && i >= 0 && visible[i]) visible[i].el.scrollIntoView({ block: 'nearest' });
 }
- 
+
 function openPanel() {
   if (!panel.hidden) return;
   panel.style.top = (wrapper.offsetTop + wrapper.offsetHeight + 4) + 'px';
@@ -231,19 +231,19 @@ function openPanel() {
   // في الجوال لا نفتح لوحة المفاتيح تلقائياً
   if (!window.matchMedia('(pointer: coarse)').matches) search.focus();
 }
- 
+
 function closePanel() {
   if (panel.hidden) return;
   panel.hidden = true;
   pickBtn.setAttribute('aria-expanded', 'false');
   caret.style.transform = '';
 }
- 
+
 pickBtn.addEventListener('click', () => (panel.hidden ? openPanel() : closePanel()));
 pickBtn.addEventListener('keydown', e => {
   if (e.key === 'ArrowDown') { e.preventDefault(); openPanel(); }
 });
- 
+
 search.addEventListener('input', () => renderList(search.value));
 search.addEventListener('keydown', e => {
   if (e.key === 'ArrowDown') { e.preventDefault(); if (visible.length) setActive((activeIdx + 1) % visible.length, true); }
@@ -251,12 +251,12 @@ search.addEventListener('keydown', e => {
   else if (e.key === 'Enter') { e.preventDefault(); if (visible[activeIdx]) selectCountry(visible[activeIdx].c); }
   else if (e.key === 'Escape') { e.preventDefault(); closePanel(); pickBtn.focus(); }
 });
- 
+
 // إغلاق القائمة عند الضغط خارجها
 document.addEventListener('pointerdown', e => {
   if (!panel.hidden && !box.contains(e.target)) closePanel();
 });
- 
+
 // العلم الظاهر على الزر حسب رمز الدولة الحالي
 function updateFlag() {
   let c;
@@ -270,17 +270,17 @@ function updateFlag() {
   flagEl.textContent = c ? c.flag : '🌐';
   if (c) selectedIso = c.iso;
 }
- 
+
 function selectCountry(c) {
   closePanel();
   selectedIso = c.iso;
- 
+
   if (c.iso === 'SY') {
     if (isIntl()) { intlMode = false; setMode(); }
     input.focus();
     return;
   }
- 
+
   if (!isIntl()) {
     intlMode = true;             // اختيار دولة غير سوريا يفعّل الوضع الدولي تلقائياً
     setMode(c.code);
@@ -290,53 +290,53 @@ function selectCountry(c) {
     input.focus();
   }
 }
- 
- 
+
+
 /* ---------- أدوات التنظيف ---------- */
- 
+
 function toLatinDigits(value) {
   return value
     .replace(/[٠-٩]/g, c => c.charCodeAt(0) - 1632)
     .replace(/[۰-۹]/g, c => c.charCodeAt(0) - 1776)
     .replace(/\D/g, '');
 }
- 
+
 // الرقم السوري: يقبل 0933... و933... و+963933... و00963933...
 function normalizeSy(value) {
   let d = toLatinDigits(value);
- 
+
   if (d.startsWith('00963')) d = d.slice(5);
   else if (d.startsWith('963') && d.length > 9) d = d.slice(3);   // 963 رمز دولة فقط إذا زاد الطول عن 9
- 
+
   if (d.startsWith('0')) d = d.slice(1);
   return d.slice(0, 9);
 }
- 
+
 function formatSy(d) {
   return d.replace(/(\d{3})(?=\d)/g, '$1 ');
 }
- 
+
 // رقم دولي: أرقام فقط، والمجموع مع رمز الدولة لا يتجاوز 15 رقماً (معيار E.164)
 function normalizeIntl(value, codeLen) {
   let d = toLatinDigits(value);
   if (d.startsWith('00')) d = d.replace(/^0+/, '');
   return d.slice(0, 15 - codeLen);
 }
- 
+
 function formatIntl(d) {
   return d.replace(/(\d{3})(?=\d)/g, '$1 ');
 }
- 
+
 // الوضع الدولي يتفعّل باختيار دولة غير سوريا من القائمة، ويعود الوضع السوري باختيار سوريا
 let intlMode = false;
- 
+
 function isIntl() {
   return intlMode;
 }
- 
- 
+
+
 /* ---------- التحقق وعرض الرسائل ---------- */
- 
+
 function validate() {
   if (!isIntl()) {
     const d = normalizeSy(input.value);
@@ -345,7 +345,7 @@ function validate() {
     if (d.length < 9) return 'الرقم ناقص: أدخلت ' + d.length + ' أرقام والمطلوب 9 أرقام';
     return '';
   }
- 
+
   const c = toLatinDigits(code.value);
   const d = normalizeIntl(input.value, c.length);
   if (!c && !d) return '';
@@ -354,7 +354,7 @@ function validate() {
   if (d.length < 6) return 'الرقم ناقص أو قصير جداً';
   return '';
 }
- 
+
 function refresh() {
   if (isIntl()) {
     const c = toLatinDigits(code.value).slice(0, 4);
@@ -368,7 +368,7 @@ function refresh() {
   msg.textContent = m;
   wrapper.style.borderColor = m ? '#ff9b9b' : BORDER_OK;
 }
- 
+
 // لصق أو كتابة رقم دولي يبدأ بـ + أو 00 لدولة غير سوريا: نتعرف على رمز الدولة
 function detectIntl(raw) {
   const t = raw.trim();
@@ -395,18 +395,18 @@ input.addEventListener('input', () => {
   refresh();
 });
 code.addEventListener('input', refresh);
- 
+
 code.addEventListener('keydown', e => {
   if (e.key === 'Enter') { e.preventDefault(); input.focus(); }
 });
- 
- 
+
+
 /* ---------- تبديل الوضع ---------- */
- 
+
 // codeArg: رمز دولة يُكتب مباشرة عند التفعيل (يأتي من اختيار دولة في القائمة)
 function setMode(codeArg) {
   const intl = isIntl();
- 
+
   if (intl) {
     code.readOnly = false;
     code.value = codeArg || '';
@@ -430,12 +430,12 @@ function setMode(codeArg) {
   wrapper.style.borderColor = BORDER_OK;
   updateFlag();
 }
- 
+
 updateFlag();
- 
- 
+
+
 /* ---------- النتيجة النهائية ---------- */
- 
+
 // الرقم بصيغة موحدة للعرض، مثل "+963 933 123 456" أو "+90 555 123 456" (أو null إن كان غير صالح)
 function getFinalPhone() {
   if (!isIntl()) {
@@ -446,13 +446,13 @@ function getFinalPhone() {
   const d = normalizeIntl(input.value, c.length);
   return (c && c[0] !== '0' && d.length >= 6) ? '+' + c + ' ' + formatIntl(d) : null;
 }
- 
+
 // الرقم بصيغة E.164 بدون مسافات، مثل "+963933123456" (مناسب للواتساب أو الـ API)
 function getE164() {
   const p = getFinalPhone();
   return p ? p.replace(/\s/g, '') : null;
 }
- 
+
 // هل الرقم المُدخل سوري؟ مفيد لتشغيل فحوصات خاصة بسوريا فقط (مثل فحص الشبكة HLR)
 function isSyrianPhone() {
   return !isIntl();

@@ -3,11 +3,11 @@
    لونه الغامق (القريب من الأسود) يتبع لون خلفية المنتج المعروض
    (المتغيران --ab-base و--ab-glow يضبطهما about.js)
    ===================================================== */
- 
+
 .footer{
     --ab-glow: #1a6fff;
     --ab-base: #0000c8;
- 
+
     position: relative;
     z-index: 2;
     padding: 56px 0 40px;
@@ -15,7 +15,7 @@
     color: #fff;
     text-align: center;
     overflow: hidden;
- 
+
     /* احتياطي للمتصفحات التي لا تدعم color-mix */
     background: #05051f;
     /* لون المنتج ممزوج بالأسود: غامق جداً لكنه يميل للون المنتج */
@@ -23,7 +23,7 @@
         radial-gradient(ellipse at 50% 0%, color-mix(in srgb, var(--ab-glow) 14%, transparent) 0, transparent 60%),
         color-mix(in srgb, var(--ab-base) 22%, #000);
 }
- 
+
 /* خط رفيع متدرج في أعلى الفوتر */
 .footer::before{
     content: '';
@@ -35,7 +35,7 @@
     background: linear-gradient(90deg, transparent, var(--ab-glow), transparent);
     opacity: .55;
 }
- 
+
 .footer-inner{
     width: 80%;
     max-width: 900px;
@@ -45,7 +45,7 @@
     align-items: center;
     gap: 26px;
 }
- 
+
 /* ===== الشعار ===== */
 .f-logo{
     display: inline-flex;
@@ -66,7 +66,7 @@
     letter-spacing: 4px;
     color: rgba(255, 255, 255, .55);
 }
- 
+
 /* ===== الروابط ===== */
 .f-nav{
     display: flex;
@@ -98,7 +98,7 @@
     .f-nav a:hover{ color: var(--ab-glow); }
     .f-nav a:hover::after{ width: 100%; }
 }
- 
+
 /* ===== الأيقونات ===== */
 .f-social{
     display: flex;
@@ -124,7 +124,7 @@
         transform: translateY(-3px);
     }
 }
- 
+
 /* ===== النص السفلي ===== */
 .f-copy{
     max-width: 560px;
@@ -133,12 +133,12 @@
     color: rgba(255, 255, 255, .5);
     word-spacing: 3px;
 }
- 
+
 /* ===== التجاوب ===== */
 @media (max-width: 900px){
     .footer-inner{ width: 92%; }
 }
- 
+
 @media (max-width: 600px){
     .footer{ padding: 44px 0 34px; }
     .footer-inner{ gap: 22px; }
@@ -148,8 +148,7 @@
     .f-social a{ width: 38px; height: 38px; font-size: 19px; }
     .f-copy{ font-size: 12.5px; }
 }
- 
+
 @media (max-width: 360px){
     .f-nav{ gap: 8px 16px; }
 }
- 

@@ -29,53 +29,53 @@
 
     <!-- لودر إعادة التحميل -->
     <div class="page-loader" id="pageLoader" aria-hidden="true"><div class="spinner"></div></div>
- 
+
     <div class="shamelll light" id="home">
- 
+
         <!-- طبقة الخلفية التي تتسع من وسط المنتج عند تغيير اللون -->
         <div class="bg-wave"></div>
- 
+
         <div class="safhaon">
- 
+
             <div class="navbar">
                 <ul>
                     <li><a href="index.html" data-reload>الرئيسية</a></li>
                     <li><a href="#about" data-scroll="about">من نحن</a></li>
-                    <li><a href="https://wa.me/40722719456">تواصل معنا</a></li>
+                    <li><a href="https://wa.me/40722719456" data-contact>تواصل معنا</a></li>
                 </ul>
- 
+
                 <a href="index.html" class="logo">RONQ</a>
             </div>
- 
+
             <div class="mohtaoa">
- 
+
                 <div class="text">
                     <h1>نظارة شمسية رجالية بعدسات مربعة من برند persol الايطالية</h1>
- 
+
                     <p>نظارة تجمع بين الأناقة الكلاسيكية والطابع العصري لتناسب الإطلالات اليومية والرسمية </p>
- 
+
                     <button class="atlopalan">اطلب الان</button>
                 </div>
- 
+
                 <div class="imgs">
-                    <!-- يضبطها الـ JS تلقائياً على أول منتج في products.js -->
+                    <!-- يضبطها الـ JS تلقائياً على أول منتج منشور في لوحة التحكم -->
                     <img class="asd" src="imgs/النظارة_فقط_دون_مساحات_خلفية.png" alt="المنتج">
-                    <!-- الصور المصغّرة لبقية زوايا المنتج: يملؤها الـ JS من PAGE_GALLERY في products.js، لا تضف صوراً هنا -->
+                    <!-- الصور المصغّرة لبقية زوايا المنتج: يملؤها الـ JS من لوحة التحكم، لا تضف صوراً هنا -->
                     <div class="gallery" id="gallery" hidden></div>
-                    <!-- شارة العرض: تظهر فقط للمنتجات التي فيها offer: true في products.js -->
+                    <!-- شارة العرض: تظهر فقط للمنتجات التي كتب لها المشرف نص عرض -->
                     <div class="offer-badge" id="offerBadge" hidden>
                         <small class="ob-label">عرض خاص</small>
                         <b class="ob-text"></b>
                     </div>
                 </div>
- 
+
                 <div class="maizat">
- 
+
                     <div class="alsaer">
                         <!-- <p class="kdem">25$</p> -->
                         <p class="jaaded"><strong class="price">20$</strong> <span>شاملة لاجور الشحن</span></p>
                     </div>
- 
+
                     <div class="overlay">
                         <ul>
                             <li>تصميم إيطالي فاخر بلمسة عصرية</li>
@@ -85,52 +85,47 @@
                             <li>تصميم مستطيل يناسب مختلف الإطلالات</li>
                         </ul>
                     </div>
- 
+
                 </div>
- 
+
             </div>
- 
+
             <div class="thelsafhaon">
- 
+
+                <!-- أيقونات التواصل: تُدار من لوحة التحكم (الصفحة الرئيسية) -->
                 <div class="tauasul">
-                    <a href="#"><i class='bx bxl-facebook'></i></a>
-                    <a href="https://www.instagram.com/ronq183?exln=cGUzbmtyMDUyeHpk"><i class='bx bxl-instagram'></i></a>
-                    <a href="https://wa.me/40722719456"><i class='bx bxl-whatsapp'></i></a>
-                    <!-- <a href="#"><i class='bx bxl-messenger'></i></a> -->
+                    <a href="https://www.instagram.com/ronq183?exln=cGUzbmtyMDUyeHpk" target="_blank" rel="noopener" aria-label="انستغرام"><i class='bx bxl-instagram'></i></a>
+                    <a href="https://wa.me/40722719456" target="_blank" rel="noopener" aria-label="واتساب"><i class='bx bxl-whatsapp'></i></a>
                 </div>
- 
-                <!-- <div class="taosel">
-                    <p>من متجرنا إلى بابك</p>
-                </div> -->
- 
-                <!-- شريط المنتجات: تملؤه الجافاسكربت من products.js، لا تضف صوراً هنا -->
+
+                <!-- شريط المنتجات: تملؤه الجافاسكربت من المنتجات المنشورة، لا تضف صوراً هنا -->
                 <div class="carousel">
-                    <!-- <button class="nav-btn prev" type="button" aria-label="المنتج السابق"><i class='bx bxs-chevron-right'></i></button> -->
-                    <!-- <div class="icon"></div> -->
-                    <!-- <button class="nav-btn next" type="button" aria-label="المنتج التالي"><i class='bx bxs-chevron-left'></i></button> -->
+                    <button class="nav-btn prev" type="button" aria-label="المنتج السابق"><i class='bx bxs-chevron-right'></i></button>
+                    <div class="icon"></div>
+                    <button class="nav-btn next" type="button" aria-label="المنتج التالي"><i class='bx bxs-chevron-left'></i></button>
                 </div>
- 
+
             </div>
- 
+
         </div>
     </div>
- 
- 
+
+
 <!-- ================= قسم من نحن ================= -->
 <section class="about" id="about">
     <div class="about-inner">
         <div class="about-grid">
- 
+
             <!-- الصور (يمين) -->
             <div class="about-media rv from-right">
                 <div class="img-main"><img src="imgs/photo_2026-11-03_06-49-16.jpg" alt="متجر RONQ" loading="lazy"></div>
             </div>
- 
+
             <!-- النصوص (يسار) -->
             <div class="about-text rv from-left" style="--d:.15s">
                 <div class="about-tag">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>
-                    من نحن
+                    <span id="abTag">من نحن</span>
                 </div>
                 <div class="about-brand">RONQ</div>
                 <h2><span class="h-store">متجر إلكتروني</span> <em>يوصل طلبك حتى باب بيتك</em></h2>
@@ -138,7 +133,7 @@
                     في RONQ نؤمن أن التسوق يجب أن يكون سهلاً وآمناً وممتعاً. نقدّم لك منتجات مختارة بعناية بجودة عالية وسعر مناسب،
                     ونتولى توصيل طلبك إلى منزلك في مختلف المحافظات مع الدفع عند الاستلام، لتستلم ما تحب وأنت مرتاح في مكانك.
                 </p>
- 
+
                 <div class="features">
                     <div class="feature">
                         <div class="f-icon">
@@ -161,7 +156,7 @@
                 </div>
             </div>
         </div>
- 
+
         <!-- العدادات -->
         <div class="counters rv" style="--d:.1s">
             <div class="counter"><div class="num" data-count="1200">0</div><div class="lbl">إجمالي الطلبات</div></div>
@@ -171,63 +166,62 @@
         </div>
     </div>
 </section>
- 
+
 <!-- ================= الفوتر ================= -->
 <footer class="footer" id="footer">
     <div class="footer-inner rv">
- 
+
         <a href="#home" data-scroll="top" class="f-logo">
             RONQ
             <small>ONLINE STORE</small>
         </a>
- 
+
         <ul class="f-nav">
             <li><a href="#home" data-scroll="top">الرئيسية</a></li>
             <li><a href="#about" data-scroll="about">من نحن</a></li>
             <li><a href="#home" data-scroll="top">المنتجات</a></li>
-            <li><a href="https://wa.me/40722719456" target="_blank" rel="noopener">تواصل معنا</a></li>
+            <li><a href="https://wa.me/40722719456" target="_blank" rel="noopener" data-contact>تواصل معنا</a></li>
         </ul>
- 
+
+        <!-- تُدار الأيقونات من لوحة التحكم (الصفحة الرئيسية) -->
         <div class="f-social">
-            <a href="#" aria-label="فيسبوك"><i class='bx bxl-facebook'></i></a>
-            <a href="https://www.instagram.com/ronq183?exln=cGUzbmtyMDUyeHpk" aria-label="انستغرام"><i class='bx bxl-instagram'></i></a>
+            <a href="https://www.instagram.com/ronq183?exln=cGUzbmtyMDUyeHpk" target="_blank" rel="noopener" aria-label="انستغرام"><i class='bx bxl-instagram'></i></a>
             <a href="https://wa.me/40722719456" target="_blank" rel="noopener" aria-label="واتساب"><i class='bx bxl-whatsapp'></i></a>
-            <!-- <a href="#" aria-label="ميتا"><i class='bx bxl-meta'></i></a> -->
         </div>
- 
+
         <p class="f-copy">
-            طلبك يصلك لباب بيتك والدفع عند الاستلام، نختار منتجاتنا بعناية لنضمن لك رضاك.<br>
+            <span id="fText">طلبك يصلك لباب بيتك والدفع عند الاستلام، نختار منتجاتنا بعناية لنضمن لك رضاك.</span><br>
             © 2026 RONQ. جميع الحقوق محفوظة.
         </p>
     </div>
 </footer>
- 
+
 <!-- زر العودة للأعلى -->
 <button class="to-top" id="toTop" type="button" aria-label="العودة للأعلى"><i class='bx bx-chevron-up'></i></button>
- 
- 
+
+
 <!-- ================= طبقة الطلب ================= -->
 <div class="maalomataltalab" id="orderOverlay" aria-hidden="true">
     <div class="order-page">
- 
+
         <!-- نفس الشريط العلوي، و"من نحن" تغلق الطبقة وتنزل لقسم من نحن -->
         <div class="navbar">
             <ul>
                 <li><a href="#">الرئيسية</a></li>
                 <li><a href="#about" data-scroll="about">من نحن</a></li>
-                <li><a href="#">تواصل معنا</a></li>
+                <li><a href="https://wa.me/40722719456" data-contact>تواصل معنا</a></li>
             </ul>
- 
+
             <a href="index.html" class="logo">RONQ</a>
         </div>
- 
+
         <div class="order-box" role="dialog" aria-modal="true" aria-labelledby="orderTitle">
             <div class="order-layout">
- 
+
                 <!-- ===== ملخص الطلب (يسار) ===== -->
                 <aside class="order-summary">
                     <div class="sum-img"><img id="sumImg" alt=""></div>
- 
+
                     <div class="sum-info">
                         <h3 id="sumName"></h3>
                         <div class="sum-price">
@@ -236,7 +230,7 @@
                         </div>
                         <p class="sum-ship">شامل أجور الشحن</p>
                     </div>
- 
+
                     <ul class="sum-badges">
                         <li>
                             <span class="ic"><i class='bx bxs-wallet'></i></span>
@@ -252,25 +246,25 @@
                         </li>
                     </ul>
                 </aside>
- 
+
                 <!-- ===== نموذج التعبئة (يمين) ===== -->
                 <form class="order-form" id="orderForm" novalidate>
                     <button class="order-close" type="button" aria-label="إغلاق"></button>
                     <h2 id="orderTitle">أكمل بيانات طلبك</h2>
- 
+
                     <div class="field">
                         <label for="fName">الاسم الكامل</label>
                         <input type="text" id="fName" autocomplete="name" placeholder="مثال: أحمد محمد">
                         <small class="err"></small>
                     </div>
- 
+
                     <div class="field">
                         <label for="x">رقم الهاتف</label>
                         <!-- يبنيها ملف phone.js (رمز سوريا + سهم القائمة)، ويجب أن يبقى الـ id هو x -->
                         <input id="x">
                     </div>
- 
-                    <!-- المحافظة (قائمة منسدلة) بجانب العنوان بالتفصيل -->
+
+                    <!-- المحافظة (قائمة منسدلة) ثم العنوان بالتفصيل -->
                     <div class="field-row">
                         <div class="field field-gov">
                             <label for="fGov">المحافظة</label>
@@ -295,7 +289,7 @@
                         </div>
                         <div class="field field-addr">
                             <label for="fAddr">العنوان بالتفصيل</label>
-                            <textarea id="fAddr" rows="3" autocomplete="street-address" placeholder="المدينة أو القرية، الحي، الشارع، أقرب نقطة دالة"></textarea>
+                            <textarea id="fAddr" rows="1" autocomplete="street-address" placeholder="المدينة، الحي، الشارع، أقرب نقطة دالة"></textarea>
                             <small class="err"></small>
                         </div>
                     </div>
@@ -309,30 +303,26 @@
                             <button type="button" id="qtyPlus" class="q-plus" aria-label="زيادة"></button>
                         </div>
                     </div>
- 
+
                     <div class="totals">
                         <div><span>الإجمالي بالدولار</span><strong id="totUsd">0$</strong></div>
                         <div><span>الإجمالي بالليرة السورية</span><strong id="totSyp">0 ل.س</strong></div>
                     </div>
- 
+
                     <p class="rate-note" id="rateNote"></p>
 
                     <button type="submit" class="order-submit">تأكيد الطلب</button>
                     <p class="order-ok" id="orderOk" hidden>تم استلام طلبك بنجاح، سنتواصل معك قريباً لتأكيده</p>
                     <p class="order-err" id="orderErr" hidden></p>
-                    <!-- رابط SMS البديل (معطّل مع إرسال واتساب):
-                    <a class="sms-fallback" id="smsFallback" href="#" hidden>لا يعمل معك واتساب؟ أرسل الطلب برسالة SMS</a>
-                    -->
                 </form>
- 
+
             </div>
         </div>
     </div>
 </div>
- 
-    <!-- الترتيب مهم: config.js ثم products.js ثم store.js ثم phone.js ثم ronq.js ثم about.js -->
+
+    <!-- الترتيب مهم: config.js ثم store.js ثم phone.js ثم ronq.js ثم about.js -->
     <script src="config.js"></script>
-    <script src="products.js"></script>
     <script src="store.js"></script>
     <script src="phone.js"></script>
     <script src="ronq.js"></script>

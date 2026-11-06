@@ -1,20 +1,20 @@
 /* =====================================================
-   ronq.js — منطق الموقع. لا تحتاج لتعديله عند إضافة منتج،
-   فالمنتجات كلها في ملف products.js
+   ronq.js — منطق الموقع. المنتجات تُدار كلها من لوحة التحكم (admin.html)،
+   ويجلبها store.js من قاعدة البيانات
    ===================================================== */
- 
+
 const main      = document.querySelector('.imgs img');    // صورة المنتج في الوسط
 const bg        = document.querySelector('.shamelll');    // خلفية الصفحة
 const wave      = document.querySelector('.bg-wave');     // الطبقة التي تتسع من الوسط
 const strip     = document.querySelector('.icon');        // شريط الصور الصغيرة
 const btnPrev   = document.querySelector('.nav-btn.prev');
 const btnNext   = document.querySelector('.nav-btn.next');
- 
+
 const VISIBLE  = 5;      // عدد الصور الصغيرة الظاهرة
 const DURATION = 900;    // مدة حركة الانتقال (ms)
- 
+
 // ===== الألوان الاحتياطية =====
-// تُستخدم للمنتج الذي لا تكتب له glow و base في products.js.
+// تُستخدم للمنتج الذي لا يحدد له المشرف ألواناً مخصصة.
 // كلها فاتحة هادئة (أبيض وتدرجاته) تظهر جميلة خلف أي منتج، وتتحول النصوص تلقائياً إلى الغامق.
 // تُوزَّع على المنتجات بالتناوب. accent = لون التمييز في قسم "من نحن" والفوتر (الأبيض لا يصلح لهما).
 const FALLBACK_COLORS = [
@@ -25,8 +25,6 @@ const FALLBACK_COLORS = [
   { glow: '#fdfcff', base: '#ddd8f1', accent: ['#7f63e0', '#45319b'] }    // لافندر
 ];
 const LIGHT_ACCENT = ['#5b7cfa', '#2f43b3'];   // لون التمييز إن كتبتَ أنت ألواناً فاتحة
-// true: يحسب لون الخلفية من صورة المنتج (الطريقة القديمة) بدل الألوان الاحتياطية
-const AUTO_COLORS_FROM_IMAGE = false;
 
 let products = [];   // المنتجات الصالحة فقط
 let current  = 0;    // رقم المنتج المعروض في المنتصف
@@ -78,14 +76,14 @@ async function hideLoader() {
   if ('scrollRestoration' in history) history.scrollRestoration = 'auto';
   await new Promise(r => setTimeout(r, 380));   // مدة التلاشي
 }
- 
- 
+
+
 /* ---------- بيانات المنتج (الاسم والشرح والأسعار والميزات) ---------- */
- 
+
 const textBox = document.querySelector('.text');      // القسم الأيمن: الاسم والشرح والزر
 const infoBox = document.querySelector('.maizat');    // القسم الأيسر: الأسعار والميزات
 const mohtaoa = document.querySelector('.mohtaoa');
- 
+
 const els = {
   name:     document.querySelector('.text h1'),
   desc:     document.querySelector('.text p'),
@@ -94,13 +92,13 @@ const els = {
   features: document.querySelector('.overlay ul'),
   badge:    document.getElementById('offerBadge')       // شارة العرض
 };
- 
+
 // أزمنة حركة النصوص (ms): خروج، توقف خارج الشاشة، عودة
 const TEXT_OUT  = 550;
 const TEXT_HOLD = 250;
 const TEXT_IN   = 1500;
- 
-// القيم الأصلية المكتوبة في index.html: تُستخدم لأي حقل لم تكتبه في products.js
+
+// القيم الأصلية المكتوبة في index.html: تُستخدم لأي حقل ناقص في بيانات المنتج
 const defaults = {
   name:     els.name     ? els.name.textContent.trim()     : '',
   desc:     els.desc     ? els.desc.textContent.trim()     : '',
@@ -108,11 +106,11 @@ const defaults = {
   price:    els.price    ? els.price.textContent.trim()    : '',
   features: els.features ? [...els.features.children].map(li => li.textContent.trim()) : []
 };
- 
+
 function toPrice(v) {
   return typeof v === 'number' ? v + '$' : String(v);
 }
- 
+
 // يأخذ الحقول النصية من المنتج ويتجاهل أي حقل فارغ أو بشكل خاطئ
 function normalizeText(o) {
   const t = {};
@@ -152,7 +150,7 @@ function showOffer(t, animate) {
     );
   }
 }
- 
+
 // الصورة محصورة داخل صندوق ثابت (contain)، فإذا كانت عريضة (نظارة مثلاً) تبتعد زاوية الصندوق عن المنتج.
 // لذلك نضع الشارة عند الزاوية العليا اليمنى لمستطيل الصورة الفعلي.
 function placeOfferBadge() {
@@ -163,13 +161,6 @@ function placeOfferBadge() {
   const w = main.naturalWidth * s, h = main.naturalHeight * s;
   b.style.top   = Math.max(0, (bh - h) / 2 - 10) + 'px';
   b.style.right = Math.max(0, (bw - w) / 2) + 'px';
-}
-
-// متجر بمنتج واحد (قائمة PRODUCTS فارغة): الشارة تُضبط من PAGE_OFFER في products.js
-function applyPageOffer() {
-  const cfg = (typeof PAGE_OFFER !== 'undefined' && PAGE_OFFER) ? PAGE_OFFER : null;
-  if (!cfg || !cfg.enabled || !cfg.text) { if (els.badge) els.badge.hidden = true; return; }
-  showOffer({ offer: String(cfg.text), offerLabel: cfg.label ? String(cfg.label) : 'عرض خاص' }, false);
 }
 
 // صندوق صورة المنتج ثابت الحجم، والصورة العريضة (نظارة) تترك فراغاً تحتها. نقيس أصغر فراغ تحت أي منتج
@@ -212,31 +203,31 @@ function applyText(p, animate) {
   }
   showOffer(t, animate);
 }
- 
+
 // المسافة التي يحتاجها القسم ليخرج بالكامل من الشاشة (يمين أو يسار)
 function offscreenShift(el, side) {
   const r = el.getBoundingClientRect();
   return side === 'right' ? window.innerWidth - r.left + 30 : -(r.right + 30);
 }
- 
+
 // في الجوال: النصوص لا تخرج للجانبين، بل تتلاشى لحظة وتعود في مكانها وقد تغيّرت
 const PHONE_QUERY = '(max-width: 900px)';   // نفس حد التخطيط العمودي في ronq.css
 const FADE_OUT  = 300;
 const FADE_HOLD = 150;
 const FADE_IN   = 400;
- 
+
 async function fadeText(p) {
   const targets = [els.name, els.desc, document.querySelector('.alsaer'), document.querySelector('.overlay')].filter(Boolean);
   const outs = targets.map(el => el.animate(
     [{ opacity: 1 }, { opacity: 0 }],
     { duration: FADE_OUT, easing: 'ease-in', fill: 'forwards' }
   ));
- 
+
   try {
     await Promise.all(outs.map(a => a.finished));
     applyText(p, true);
     await new Promise(r => setTimeout(r, FADE_HOLD));
- 
+
     const ins = targets.map(el => el.animate(
       [{ opacity: 0 }, { opacity: 1 }],
       { duration: FADE_IN, easing: 'ease-out', fill: 'backwards' }
@@ -247,7 +238,7 @@ async function fadeText(p) {
     outs.forEach(a => a.cancel());
   }
 }
- 
+
 // القسمان يخرجان إلى جانبي الموقع، يتوقفان قليلاً وتتبدل بياناتهما، ثم يعودان
 async function swapText(p) {
   if (window.matchMedia(PHONE_QUERY).matches) return fadeText(p);
@@ -255,17 +246,17 @@ async function swapText(p) {
     { el: textBox, side: 'right' },
     { el: infoBox, side: 'left' }
   ].filter(b => b.el).map(b => ({ ...b, dx: offscreenShift(b.el, b.side) }));
- 
+
   const outs = boxes.map(b => b.el.animate(
     [{ transform: 'translateX(0)' }, { transform: `translateX(${b.dx}px)` }],
     { duration: TEXT_OUT, easing: 'ease-in', fill: 'forwards' }
   ));
- 
+
   try {
     await Promise.all(outs.map(a => a.finished));
     applyText(p, true);
     await new Promise(r => setTimeout(r, TEXT_HOLD));
- 
+
     const ins = boxes.map((b, i) => b.el.animate(
       [{ transform: `translateX(${b.dx}px)` }, { transform: 'translateX(0)' }],
       { duration: TEXT_IN, delay: i * 90, easing: 'cubic-bezier(.2,.8,.2,1)', fill: 'backwards' }
@@ -276,7 +267,7 @@ async function swapText(p) {
     outs.forEach(a => a.cancel());
   }
 }
- 
+
 // نثبّت ارتفاع القسم على أطول بيانات بين المنتجات، حتى لا تتحرك صورة المنتج عند اختلاف طول النصوص
 function lockLayoutHeight() {
   if (!mohtaoa || !products.length) return;
@@ -291,7 +282,7 @@ function lockLayoutHeight() {
   mohtaoa.style.minHeight = max + 'px';
   updateGlowCenter();
 }
- 
+
 let lockTimer;
 function scheduleLock() {
   clearTimeout(lockTimer);
@@ -299,69 +290,108 @@ function scheduleLock() {
 }
 window.addEventListener('resize', scheduleLock);
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(scheduleLock);
- 
- 
+
+
 /* ---------- أدوات مساعدة ---------- */
- 
-function loadImage(src) {
+
+function plainLoad(src, cors) {
   return new Promise((resolve, reject) => {
     const img = new Image();
+    if (cors) img.crossOrigin = 'anonymous';
     img.onload  = () => resolve(img);
     img.onerror = () => reject(new Error('تعذّر تحميل الصورة: ' + src));
     img.src = src;
   });
 }
- 
-function rgbToHsl(r, g, b) {
-  r /= 255; g /= 255; b /= 255;
-  const max = Math.max(r, g, b), min = Math.min(r, g, b);
-  const l = (max + min) / 2;
-  let h = 0, s = 0;
-  if (max !== min) {
-    const d = max - min;
-    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-    if (max === r)      h = (g - b) / d + (g < b ? 6 : 0);
-    else if (max === g) h = (b - r) / d + 2;
-    else                h = (r - g) / d + 4;
-    h *= 60;
-  }
-  return [h, s, l];
-}
- 
-// يحسب لون التوهج من الصورة نفسها (يعطي null إذا منع المتصفح قراءة البكسلات)
-function autoColors(img) {
-  try {
-    const S = 40;
-    const c = document.createElement('canvas');
-    c.width = c.height = S;
-    const ctx = c.getContext('2d', { willReadFrequently: true });
-    ctx.drawImage(img, 0, 0, S, S);
-    const d = ctx.getImageData(0, 0, S, S).data;
- 
-    let r = 0, g = 0, b = 0, w = 0;
-    for (let i = 0; i < d.length; i += 4) {
-      if (d[i + 3] < 200) continue;                       // نتجاهل الشفاف
-      const max = Math.max(d[i], d[i + 1], d[i + 2]);
-      const min = Math.min(d[i], d[i + 1], d[i + 2]);
-      const sat = max ? (max - min) / max : 0;
-      const wt = sat * (max / 255) + 0.02;                // الألوان الزاهية أهم من الأسود والأبيض
-      r += d[i] * wt; g += d[i + 1] * wt; b += d[i + 2] * wt; w += wt;
-    }
-    if (!w) return null;
- 
-    let [h, s] = rgbToHsl(r / w, g / w, b / w);
-    if (s < 0.08) h = 220;                                // صورة رمادية: نميل للأزرق
-    const gs = Math.round(Math.max(s, 0.45) * 100);
-    const bs = Math.round(Math.max(s, 0.5) * 100);
-    return {
-      glow: `hsl(${Math.round(h)}, ${gs}%, 52%)`,
-      base: `hsl(${Math.round(h)}, ${bs}%, 20%)`
+
+/* ---------- قصّ الهوامش الفارغة حول المنتج تلقائياً ----------
+   صور المنتجات تختلف في المساحة الشفافة (أو البيضاء) حول المنتج، فيظهر المنتج أحياناً أصغر وأحياناً أكبر،
+   وتبعد الصور المصغّرة عنه. لذلك نقصّ كل صورة عند التحميل على حدود المنتج الفعلية مع هامش ثابت صغير،
+   فتشغل كل المنتجات صندوق العرض بنفس الطريقة. إن تعذّر القصّ (حماية CORS مثلاً) تُعرض الصورة كما هي. */
+
+const TRIM_ALPHA  = 24;     // أدنى شفافية تُعدّ جزءاً من المنتج (من 255)
+const TRIM_MARGIN = 0.03;   // الهامش حول المنتج بعد القصّ (نسبة من أطول ضلع)
+const trimCache = new Map();
+
+function findBox(img) {
+  const W = img.naturalWidth, H = img.naturalHeight;
+  if (!W || !H) return null;
+  const s = Math.min(1, 400 / Math.max(W, H));
+  const w = Math.max(1, Math.round(W * s)), h = Math.max(1, Math.round(H * s));
+  const c = document.createElement('canvas');
+  c.width = w; c.height = h;
+  const ctx = c.getContext('2d', { willReadFrequently: true });
+  ctx.drawImage(img, 0, 0, w, h);
+  const d = ctx.getImageData(0, 0, w, h).data;      // يرمي خطأ إن كانت الصورة محجوبة (CORS)
+
+  let clear = 0;
+  for (let i = 3; i < d.length; i += 4) if (d[i] < 20) clear++;
+  const alphaMode = clear >= 0.03 * w * h;           // صورة بخلفية شفافة؟
+
+  let isFg, bgc = null;
+  if (alphaMode) {
+    isFg = i => d[i + 3] >= TRIM_ALPHA;
+  } else {
+    // خلفية مصمتة (jpg): لون الزوايا الأربع يجب أن يتقارب، وما يختلف عنه فهو المنتج
+    const k = Math.max(2, Math.round(Math.min(w, h) * 0.03));
+    const patch = (x0, y0) => {
+      let r = 0, g = 0, b = 0, n = 0;
+      for (let y = y0; y < y0 + k; y++) for (let x = x0; x < x0 + k; x++) { const i = (y * w + x) * 4; r += d[i]; g += d[i + 1]; b += d[i + 2]; n++; }
+      return [r / n, g / n, b / n];
     };
-  } catch (e) {
-    return null;
+    const cs = [patch(0, 0), patch(w - k, 0), patch(0, h - k), patch(w - k, h - k)];
+    bgc = [0, 1, 2].map(ch => cs.reduce((a, p) => a + p[ch], 0) / 4);
+    if (cs.some(p => Math.max(Math.abs(p[0] - bgc[0]), Math.abs(p[1] - bgc[1]), Math.abs(p[2] - bgc[2])) > 40)) return null;
+    isFg = i => d[i + 3] >= TRIM_ALPHA &&
+      Math.max(Math.abs(d[i] - bgc[0]), Math.abs(d[i + 1] - bgc[1]), Math.abs(d[i + 2] - bgc[2])) > 38;
   }
+
+  let x0 = w, y0 = h, x1 = -1, y1 = -1;
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      if (!isFg((y * w + x) * 4)) continue;
+      if (x < x0) x0 = x; if (x > x1) x1 = x;
+      if (y < y0) y0 = y; if (y > y1) y1 = y;
+    }
+  }
+  if (x1 < 0) return null;
+  const bx = Math.floor(x0 / s), by = Math.floor(y0 / s);
+  const bw = Math.min(W - bx, Math.ceil((x1 + 1) / s) - bx), bh = Math.min(H - by, Math.ceil((y1 + 1) / s) - by);
+  const m = Math.round(Math.max(bw, bh) * TRIM_MARGIN);
+  if (bw + 2 * m >= 0.9 * W && bh + 2 * m >= 0.9 * H) return null;   // لا هوامش تستحق القصّ
+  return { bx, by, bw, bh, m, alphaMode, bgc };
 }
- 
+
+function trimImage(src) {
+  if (/^(blob|data):/i.test(src)) return Promise.resolve(null);
+  if (trimCache.has(src)) return trimCache.get(src);
+  const job = (async () => {
+    try {
+      const img = await plainLoad(src, true);
+      const b = findBox(img);
+      if (!b) return null;
+      const cw = b.bw + 2 * b.m, ch = b.bh + 2 * b.m;
+      const sc = Math.min(1, 1600 / Math.max(cw, ch));
+      const c = document.createElement('canvas');
+      c.width = Math.round(cw * sc); c.height = Math.round(ch * sc);
+      const ctx = c.getContext('2d');
+      if (!b.alphaMode) { ctx.fillStyle = 'rgb(' + b.bgc.map(Math.round).join(',') + ')'; ctx.fillRect(0, 0, c.width, c.height); }
+      ctx.drawImage(img, b.bx, b.by, b.bw, b.bh, b.m * sc, b.m * sc, b.bw * sc, b.bh * sc);
+      const blob = await new Promise(r => c.toBlob(r, b.alphaMode ? 'image/png' : 'image/jpeg', 0.92));
+      return blob ? URL.createObjectURL(blob) : null;
+    } catch (e) {
+      return null;
+    }
+  })();
+  trimCache.set(src, job);
+  return job;
+}
+
+async function loadImage(src) {
+  const trimmed = await trimImage(src);
+  return plainLoad(trimmed || src, false);
+}
+
 // سطوع لون CSS (0 غامق ... 1 فاتح): نحوّله إلى RGB عبر canvas ليعمل مع hex وhsl والأسماء
 function brightness(color) {
   try {
@@ -391,10 +421,6 @@ function buildProduct(item, index, img) {
   const o = typeof item === 'string' ? { src: item } : item;
   let glow = o.glow, base = o.base, accent = null;
 
-  if ((!glow || !base) && AUTO_COLORS_FROM_IMAGE) {
-    const auto = autoColors(img);
-    if (auto) { glow = glow || auto.glow; base = base || auto.base; }
-  }
   if (!glow || !base) {
     const f = FALLBACK_COLORS[index % FALLBACK_COLORS.length];
     glow = glow || f.glow;
@@ -402,7 +428,7 @@ function buildProduct(item, index, img) {
     accent = f.accent;
   }
   const light = isLightBg(glow, base);
-  return { url: img.src, img, glow, base, light, accent: light ? (accent || LIGHT_ACCENT) : null, text: normalizeText(o) };
+  return { url: img.src, img, glow, base, light, accent: light ? (accent || LIGHT_ACCENT) : null, text: normalizeText(o), gallery: Array.isArray(o.gallery) ? o.gallery : [] };
 }
 
 function setBackground(p) {
@@ -418,10 +444,10 @@ function setBackground(p) {
     bg.style.removeProperty('--acc-base');
   }
 }
- 
- 
+
+
 /* ---------- مركز التوهج خلف صورة المنتج ---------- */
- 
+
 function getGlowGeometry() {
   const r = main.getBoundingClientRect();
   const b = bg.getBoundingClientRect();
@@ -430,22 +456,22 @@ function getGlowGeometry() {
   const radius = Math.hypot(Math.max(cx, b.width - cx), Math.max(cy, b.height - cy)) + 4;
   return { cx, cy, radius };
 }
- 
+
 function updateGlowCenter() {
   const { cx, cy } = getGlowGeometry();
   bg.style.setProperty('--cx', cx + 'px');
   bg.style.setProperty('--cy', cy + 'px');
 }
- 
+
 window.addEventListener('load', updateGlowCenter);
 window.addEventListener('resize', updateGlowCenter);
 main.addEventListener('load', updateGlowCenter);
 updateGlowCenter();
- 
- 
+
+
 /* ---------- معرض صور المنتج ----------
-   الصورة الأساسية = الصورة المكتوبة في index.html، وبقية الزوايا تُكتب في PAGE_GALLERY (products.js).
-   تظهر صور مصغّرة تحت المنتج؛ الضغط عليها أو السحب يميناً/يساراً على المنتج يبدّل الصورة بحركة ناعمة. */
+   الصورة الأولى للمنتج هي الرئيسية، وبقية صوره (زواياه الأخرى) تظهر مصغّرة تحته؛
+   الضغط عليها أو السحب يميناً/يساراً على المنتج يبدّل الصورة بحركة ناعمة. */
 
 const imgsBox    = document.querySelector('.imgs');
 const galleryBox = document.getElementById('gallery');
@@ -453,21 +479,40 @@ let galleryList  = [];      // [{ url }] — الأولى هي الصورة ال
 let galleryIdx   = 0;       // رقم الصورة المعروضة
 let gallerySwap  = 0;       // رقم آخر عملية تبديل (لتجاهل الضغطات السريعة المتتالية)
 let galleryAnim  = null;
+let galleryBuild = 0;       // رقم آخر بناء للمعرض (لتجاهل البناء القديم عند التنقل السريع)
+let galleryRatios = [];     // نسبة ارتفاع/عرض كل صورة من صور المنتج (لوضع الصور المصغّرة تحت أطول زاوية)
+let reserveGallery = false; // أي منتج له معرض؟ نحجز مساحته دائماً حتى لا تقفز الصفحة بين المنتجات
+
+// الصور المصغّرة تلتصق بأسفل المنتج بمسافة ثابتة (لا تبعد ولا تقترب مهما كانت أبعاد الصورة).
+// موضعها ثابت: تحت أطول زاوية للمنتج، فلا تتحرك عند التبديل بين الزوايا.
+const GALLERY_GAP = 34;
+function placeGallery() {
+  if (!galleryBox || !galleryRatios.length) return;
+  const bw = main.offsetWidth, bh = main.offsetHeight;
+  if (!bw || !bh) return;
+  const shown = Math.min(bh, bw * Math.max(...galleryRatios));   // تحت أطول زاوية: الموضع ثابت بين كل الصور
+  galleryBox.style.bottom = 'auto';
+  galleryBox.style.top = Math.round(bh / 2 + shown / 2 + GALLERY_GAP) + 'px';
+}
+window.addEventListener('resize', placeGallery);
 
 async function setGallery(extraSrcs) {
   if (!galleryBox || !imgsBox) return;
   const extras = (Array.isArray(extraSrcs) ? extraSrcs : []).map(s => String(s || '').trim().replace(/^\/+/, '')).filter(Boolean);   // نحذف الشرطة الأولى إن كُتبت: '/imgs/a.png' = 'imgs/a.png'
 
+  const build = ++galleryBuild;
   galleryBox.replaceChildren();
   galleryBox.hidden = true;
   galleryList = [];
+  galleryRatios = [];
   galleryIdx = 0;
   // نحجز مساحة الصور المصغّرة فوراً حتى لا تقفز الصفحة بعد تحميل الصور
-  imgsBox.classList.toggle('has-gallery', extras.length > 0);
+  imgsBox.classList.toggle('has-gallery', reserveGallery || extras.length > 0);
   updateImageGap();
   if (!extras.length) return;
 
   const results = await Promise.allSettled([main.src, ...extras].map(loadImage));
+  if (build !== galleryBuild) return;   // انتقل الزائر لمنتج آخر أثناء التحميل
   const seen = new Set();
   results.forEach(res => {
     if (res.status !== 'fulfilled') { console.warn('تم تجاهل صورة من المعرض:', res.reason.message); return; }
@@ -475,11 +520,12 @@ async function setGallery(extraSrcs) {
     if (seen.has(url)) return;       // إن كررتَ الصورة الأساسية لا تظهر مرتين
     seen.add(url);
     galleryList.push({ url });
+    galleryRatios.push(res.value.naturalHeight / res.value.naturalWidth);
   });
 
   if (galleryList.length < 2) {      // لا معنى لمعرض بصورة واحدة
     galleryList = [];
-    imgsBox.classList.remove('has-gallery');
+    imgsBox.classList.toggle('has-gallery', reserveGallery);
     updateImageGap();
     updateGlowCenter();
     return;
@@ -495,6 +541,7 @@ async function setGallery(extraSrcs) {
     return b;
   }));
   galleryBox.hidden = false;
+  placeGallery();
   galleryBox.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 450, easing: 'ease-out' });
   main.draggable = false;
   updateImageGap();
@@ -506,6 +553,7 @@ async function showGalleryImage(i, dir) {
   if (!galleryList[i] || i === galleryIdx) return;
   if (dir === undefined) dir = i > galleryIdx ? 1 : -1;
   galleryIdx = i;
+  placeGallery();
   const token = ++gallerySwap;
 
   [...galleryBox.children].forEach((b, k) => b.classList.toggle('active', k === i));
@@ -567,394 +615,412 @@ if (imgsBox) {
 
 
 /* ---------- شريط الصور الصغيرة (حلقة) ---------- */
- 
-// const STRIP_MS = 700;   // مدة تقدّم الصور داخل الشريط (ms)
- 
-// // الشريط يعرض المنتجات التي تلي المنتج المعروض في المنتصف، ويلتف حول القائمة
-// // (المنتج المعروض في المنتصف لا يتكرر داخل الشريط)
-// function stripIndexes(cur) {
-//   const n = products.length;
-//   const count = isSmall() ? n - 1 : Math.min(VISIBLE, n - 1);   // الجوال: كل المنتجات للتمرير باللمس
-//   return Array.from({ length: count }, (_, k) => (cur + 1 + k) % n);
-// }
- 
-// function makeThumb(pi) {
-//   const img = document.createElement('img');
-//   img.src = products[pi].url;
-//   img.alt = 'المنتج ' + (pi + 1);
-//   img.draggable = false;
-//   img.dataset.index = pi;
-//   img.addEventListener('click', () => goTo(pi, img));
-//   return img;
-// }
- 
-// function updateArrows() {
-//   const single = products.length < 2;
-//   btnPrev.hidden = single;
-//   btnNext.hidden = single;
-// }
- 
-// // بناء الشريط أول مرة (بدون حركة)
-// function renderStrip() {
-//   strip.replaceChildren(...stripIndexes(current).map(makeThumb));
-//   updateArrows();
-// }
- 
-// function median(arr) {
-//   if (!arr.length) return 0;
-//   const s = [...arr].sort((a, b) => a - b);
-//   return s[Math.floor(s.length / 2)];
-// }
- 
-// // يحدّث الشريط للمنتج الجديد بحركة هادئة، كأن الصور مصطفّة على "دور" يتحرك:
-// // الصورة المضغوطة تغادر مكانها (تطير للمنتصف)، فتتقدم الصور التي بعدها لتملأ الفراغ بانزلاق ناعم،
-// // وصورة المنتج الذي كان في المنتصف تظهر في نهاية الصف.
-// // lateIndex: منتج يظهر مكانه في الشريط في آخر الحركة فقط (عند الرجوع تهبط إليه الصورة الطائرة)
-// function updateStrip(newCur, clickedEl, lateIndex = -1) {
-//   const small = isSmall();
-//   const oldEls = [...strip.children];
-//   const oldRects = new Map(oldEls.map(el => [el, el.getBoundingClientRect()]));
-//   const byIndex = new Map(oldEls.map(el => [Number(el.dataset.index), el]));
 
-//   const reused = new Set();
-//   const fresh = new Set();
-//   // الجوال: الشريط "دور" بسيط. الصورة المضغوطة تخرج منه فقط، والبقية تحتفظ بترتيبها وتتقدم خطوة،
-//   // وصورة المنتج الذي كان في المنتصف تُضاف في آخر الدور (بدون التفاف يجعل الصور تعبر فوق بعضها)
-//   let idxList = stripIndexes(newCur);
-//   if (small && lateIndex < 0) {
-//     idxList = oldEls.map(el => Number(el.dataset.index)).filter(pi => pi !== newCur);
-//     idxList.push(current);
-//   }
-//   // الجوال أبطأ وأهدأ: الانزلاق يبدأ بعد أن تبتعد الصورة الطائرة، والصورة الجديدة تظهر بعده
-//   const slideMs    = small ? 1000 : STRIP_MS;
-//   const slideDelay = small ? 250 : 100;
-//   const freshMs    = small ? 800 : STRIP_MS;
-//   const freshDelay = small ? 550 : 150;
+const STRIP_MS = 700;   // مدة تقدّم الصور داخل الشريط (ms)
 
-//   const ordered = idxList.map(pi => {
-//     const old = byIndex.get(pi);
-//     if (old && old !== clickedEl) { reused.add(old); return old; }
-//     const el = makeThumb(pi);
-//     fresh.add(el);
-//     return el;
-//   });
+// الشريط يعرض المنتجات التي تلي المنتج المعروض في المنتصف، ويلتف حول القائمة
+// (المنتج المعروض في المنتصف لا يتكرر داخل الشريط)
+function stripIndexes(cur) {
+  const n = products.length;
+  const count = isSmall() ? n - 1 : Math.min(VISIBLE, n - 1);   // الجوال: كل المنتجات للتمرير باللمس
+  return Array.from({ length: count }, (_, k) => (cur + 1 + k) % n);
+}
 
-//   // الصور الخارجة من الشريط (غير المضغوطة): نسخة ثابتة تتلاشى في مكانها بنفس شكلها (الخلفية الضبابية)
-//   oldEls.forEach(el => {
-//     if (reused.has(el) || el === clickedEl) return;
-//     const r = oldRects.get(el);
-//     const cs = getComputedStyle(el);
-//     const ghost = el.cloneNode();
-//     Object.assign(ghost.style, {
-//       position: 'fixed',
-//       left: r.left + 'px',
-//       top: r.top + 'px',
-//       width: r.width + 'px',
-//       height: r.height + 'px',
-//       maxWidth: 'none',
-//       objectFit: 'contain',
-//       margin: 0,
-//       zIndex: 5,
-//       pointerEvents: 'none',
-//       boxSizing: 'border-box',
-//       padding: cs.padding,
-//       borderWidth: cs.borderTopWidth,
-//       borderStyle: cs.borderTopStyle,
-//       borderColor: cs.borderTopColor,
-//       borderRadius: cs.borderRadius,
-//       backgroundColor: cs.backgroundColor
-//     });
-//     document.body.appendChild(ghost);
-//     ghost.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 350, easing: 'ease-out', fill: 'forwards' })
-//       .finished.then(() => ghost.remove(), () => ghost.remove());
-//   });
+function makeThumb(pi) {
+  const img = document.createElement('img');
+  img.src = products[pi].url;
+  img.alt = 'المنتج ' + (pi + 1);
+  img.draggable = false;
+  img.dataset.index = pi;
+  img.addEventListener('click', () => goTo(pi, img));
+  return img;
+}
 
-//   // إطار الصورة المضغوطة (خلفيتها الضبابية) يتلاشى في مكانه بهدوء بدل أن يختفي فجأة
-//   if (clickedEl) {
-//     const r = oldRects.get(clickedEl);
-//     const cs = getComputedStyle(clickedEl);
-//     if (cs.backgroundColor !== 'rgba(0, 0, 0, 0)') {
-//       const frame = document.createElement('div');
-//       Object.assign(frame.style, {
-//         position: 'fixed',
-//         left: r.left + 'px',
-//         top: r.top + 'px',
-//         width: r.width + 'px',
-//         height: r.height + 'px',
-//         zIndex: 4,
-//         pointerEvents: 'none',
-//         boxSizing: 'border-box',
-//         borderWidth: cs.borderTopWidth,
-//         borderStyle: cs.borderTopStyle,
-//         borderColor: cs.borderTopColor,
-//         borderRadius: cs.borderRadius,
-//         backgroundColor: cs.backgroundColor,
-//         backdropFilter: cs.backdropFilter,
-//         webkitBackdropFilter: cs.backdropFilter
-//       });
-//       document.body.appendChild(frame);
-//       frame.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 600, easing: 'ease-out', fill: 'forwards' })
-//         .finished.then(() => frame.remove(), () => frame.remove());
-//     }
-//   }
+function updateArrows() {
+  const single = products.length < 2;
+  btnPrev.hidden = single;
+  btnNext.hidden = single;
+  const box = strip.parentElement;
+  box.hidden = single;                                          // منتج واحد: لا شريط
+  box.style.setProperty('--n', Math.max(1, strip.children.length));   // عرض الشريط على قد عدد صوره
+}
 
-//   strip.replaceChildren(...ordered);
+// بناء الشريط أول مرة (بدون حركة)
+function renderStrip() {
+  strip.replaceChildren(...stripIndexes(current).map(makeThumb));
+  updateArrows();
+}
 
-//   const ease = 'cubic-bezier(.45, .05, .25, 1)';   // حركة هادئة تبدأ وتنتهي بنعومة
-//   const anims = [];
-//   const shifts = [];
+function median(arr) {
+  if (!arr.length) return 0;
+  const s = [...arr].sort((a, b) => a - b);
+  return s[Math.floor(s.length / 2)];
+}
 
-//   // الصور الباقية تنزلق من مكانها القديم إلى الجديد (بعد لحظة قصيرة من اختفاء الصورة المضغوطة)
-//   reused.forEach(el => {
-//     const o = oldRects.get(el);
-//     const n = el.getBoundingClientRect();
-//     const dx = o.left - n.left;
-//     const dy = o.top - n.top;
-//     if (Math.abs(dx) < 1 && Math.abs(dy) < 1) return;
-//     shifts.push(dx);
-//     anims.push(el.animate(
-//       [{ transform: `translate(${dx}px, ${dy}px)` }, { transform: 'translate(0, 0)' }],
-//       { duration: slideMs, delay: slideDelay, easing: ease, fill: 'backwards' }
-//     ).finished);
-//   });
+// يحدّث الشريط للمنتج الجديد بحركة هادئة، كأن الصور مصطفّة على "دور" يتحرك:
+// الصورة المضغوطة تغادر مكانها (تطير للمنتصف)، فتتقدم الصور التي بعدها لتملأ الفراغ بانزلاق ناعم،
+// وصورة المنتج الذي كان في المنتصف تظهر في نهاية الصف.
+// lateIndex: منتج يظهر مكانه في الشريط في آخر الحركة فقط (عند الرجوع تهبط إليه الصورة الطائرة)
+function updateStrip(newCur, clickedEl, lateIndex = -1) {
+  const small = isSmall();
+  const oldEls = [...strip.children];
+  const oldRects = new Map(oldEls.map(el => [el, el.getBoundingClientRect()]));
+  const byIndex = new Map(oldEls.map(el => [Number(el.dataset.index), el]));
 
-//   // الصور الجديدة تدخل مع نفس الاتجاه كأنها جزء من الحركة
-//   const typical = median(shifts);
-//   fresh.forEach(el => {
-//     if (Number(el.dataset.index) === lateIndex) {
-//       // تبقى مخفية حتى تصلها الصورة الطائرة في آخر الحركة
-//       anims.push(el.animate(
-//         [{ opacity: 0 }, { opacity: 0, offset: 0.9 }, { opacity: 1 }],
-//         { duration: DURATION, easing: 'linear', fill: 'backwards' }
-//       ).finished);
-//       return;
-//     }
-//     anims.push(el.animate(
-//       [{ opacity: 0, transform: `translateX(${typical}px)` }, { opacity: 1, transform: 'translateX(0)' }],
-//       { duration: freshMs, delay: freshDelay, easing: ease, fill: 'backwards' }
-//     ).finished);
-//   });
+  const reused = new Set();
+  const fresh = new Set();
+  // الجوال: الشريط "دور" بسيط. الصورة المضغوطة تخرج منه فقط، والبقية تحتفظ بترتيبها وتتقدم خطوة،
+  // وصورة المنتج الذي كان في المنتصف تُضاف في آخر الدور (بدون التفاف يجعل الصور تعبر فوق بعضها)
+  let idxList = stripIndexes(newCur);
+  if (small && lateIndex < 0) {
+    idxList = oldEls.map(el => Number(el.dataset.index)).filter(pi => pi !== newCur);
+    idxList.push(current);
+  }
+  // الجوال أبطأ وأهدأ: الانزلاق يبدأ بعد أن تبتعد الصورة الطائرة، والصورة الجديدة تظهر بعده
+  const slideMs    = small ? 1000 : STRIP_MS;
+  const slideDelay = small ? 250 : 100;
+  const freshMs    = small ? 800 : STRIP_MS;
+  const freshDelay = small ? 550 : 150;
 
-//   updateArrows();
-//   return Promise.all(anims).catch(() => {});
-// }
+  const ordered = idxList.map(pi => {
+    const old = byIndex.get(pi);
+    if (old && old !== clickedEl) { reused.add(old); return old; }
+    const el = makeThumb(pi);
+    fresh.add(el);
+    return el;
+  });
+
+  // الصور الخارجة من الشريط (غير المضغوطة): نسخة ثابتة تتلاشى في مكانها بنفس شكلها (الخلفية الضبابية)
+  oldEls.forEach(el => {
+    if (reused.has(el) || el === clickedEl) return;
+    const r = oldRects.get(el);
+    const cs = getComputedStyle(el);
+    const ghost = el.cloneNode();
+    Object.assign(ghost.style, {
+      position: 'fixed',
+      left: r.left + 'px',
+      top: r.top + 'px',
+      width: r.width + 'px',
+      height: r.height + 'px',
+      maxWidth: 'none',
+      objectFit: 'contain',
+      margin: 0,
+      zIndex: 5,
+      pointerEvents: 'none',
+      boxSizing: 'border-box',
+      padding: cs.padding,
+      borderWidth: cs.borderTopWidth,
+      borderStyle: cs.borderTopStyle,
+      borderColor: cs.borderTopColor,
+      borderRadius: cs.borderRadius,
+      backgroundColor: cs.backgroundColor
+    });
+    document.body.appendChild(ghost);
+    ghost.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 350, easing: 'ease-out', fill: 'forwards' })
+      .finished.then(() => ghost.remove(), () => ghost.remove());
+  });
+
+  // إطار الصورة المضغوطة (خلفيتها الضبابية) يتلاشى في مكانه بهدوء بدل أن يختفي فجأة
+  if (clickedEl) {
+    const r = oldRects.get(clickedEl);
+    const cs = getComputedStyle(clickedEl);
+    if (cs.backgroundColor !== 'rgba(0, 0, 0, 0)') {
+      const frame = document.createElement('div');
+      Object.assign(frame.style, {
+        position: 'fixed',
+        left: r.left + 'px',
+        top: r.top + 'px',
+        width: r.width + 'px',
+        height: r.height + 'px',
+        zIndex: 4,
+        pointerEvents: 'none',
+        boxSizing: 'border-box',
+        borderWidth: cs.borderTopWidth,
+        borderStyle: cs.borderTopStyle,
+        borderColor: cs.borderTopColor,
+        borderRadius: cs.borderRadius,
+        backgroundColor: cs.backgroundColor,
+        backdropFilter: cs.backdropFilter,
+        webkitBackdropFilter: cs.backdropFilter
+      });
+      document.body.appendChild(frame);
+      frame.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 600, easing: 'ease-out', fill: 'forwards' })
+        .finished.then(() => frame.remove(), () => frame.remove());
+    }
+  }
+
+  strip.replaceChildren(...ordered);
+
+  const ease = 'cubic-bezier(.45, .05, .25, 1)';   // حركة هادئة تبدأ وتنتهي بنعومة
+  const anims = [];
+  const shifts = [];
+
+  // الصور الباقية تنزلق من مكانها القديم إلى الجديد (بعد لحظة قصيرة من اختفاء الصورة المضغوطة)
+  reused.forEach(el => {
+    const o = oldRects.get(el);
+    const n = el.getBoundingClientRect();
+    const dx = o.left - n.left;
+    const dy = o.top - n.top;
+    if (Math.abs(dx) < 1 && Math.abs(dy) < 1) return;
+    shifts.push(dx);
+    anims.push(el.animate(
+      [{ transform: `translate(${dx}px, ${dy}px)` }, { transform: 'translate(0, 0)' }],
+      { duration: slideMs, delay: slideDelay, easing: ease, fill: 'backwards' }
+    ).finished);
+  });
+
+  // الصور الجديدة تدخل مع نفس الاتجاه كأنها جزء من الحركة
+  const typical = median(shifts);
+  fresh.forEach(el => {
+    if (Number(el.dataset.index) === lateIndex) {
+      // تبقى مخفية حتى تصلها الصورة الطائرة في آخر الحركة
+      anims.push(el.animate(
+        [{ opacity: 0 }, { opacity: 0, offset: 0.9 }, { opacity: 1 }],
+        { duration: DURATION, easing: 'linear', fill: 'backwards' }
+      ).finished);
+      return;
+    }
+    anims.push(el.animate(
+      [{ opacity: 0, transform: `translateX(${typical}px)` }, { opacity: 1, transform: 'translateX(0)' }],
+      { duration: freshMs, delay: freshDelay, easing: ease, fill: 'backwards' }
+    ).finished);
+  });
+
+  updateArrows();
+  return Promise.all(anims).catch(() => {});
+}
 
 
-// /* ---------- الانتقال إلى منتج ---------- */
- 
-// // الشاشات الصغيرة (نفس حد التخطيط العمودي في ronq.css)
-// const SMALL_QUERY = '(max-width: 900px)';
-// const isSmall = () => window.matchMedia(SMALL_QUERY).matches;
+/* ---------- الانتقال إلى منتج ---------- */
 
-// // عند عبور حد الشاشة الصغيرة نعيد بناء الشريط (كل المنتجات للتمرير في الجوال، و5 في الشاشات الكبيرة)
-// window.matchMedia(SMALL_QUERY).addEventListener('change', () => {
-//   if (!busy && products.length) renderStrip();
-// });
+// الشاشات الصغيرة (نفس حد التخطيط العمودي في ronq.css)
+const SMALL_QUERY = '(max-width: 900px)';
+const isSmall = () => window.matchMedia(SMALL_QUERY).matches;
 
-// // الشريط في الجوال تحت الصورة: إن كان المنتج الكبير خارج الشاشة نصعد إليه أولاً ثم تبدأ الحركة
-// async function ensureMainVisible() {
-//   const r = main.getBoundingClientRect();
-//   if (r.top >= 0 && r.bottom <= window.innerHeight) return;
-//   window.scrollTo({ top: 0, behavior: 'smooth' });
-//   let last = -1, same = 0;
-//   for (let i = 0; i < 30 && same < 3; i++) {
-//     await new Promise(res => setTimeout(res, 50));
-//     same = window.scrollY === last ? same + 1 : 0;
-//     last = window.scrollY;
-//   }
-// }
+// عند عبور حد الشاشة الصغيرة نعيد بناء الشريط (كل المنتجات للتمرير في الجوال، و5 في الشاشات الكبيرة)
+window.matchMedia(SMALL_QUERY).addEventListener('change', () => {
+  if (!busy && products.length) renderStrip();
+});
 
-// // المستطيل الذي تشغله الصورة فعلياً داخل صندوق (object-fit: contain)
-// function fitRect(box, img) {
-//   const s = Math.min(box.width / img.naturalWidth, box.height / img.naturalHeight);
-//   const w = img.naturalWidth * s, h = img.naturalHeight * s;
-//   return { left: box.left + (box.width - w) / 2, top: box.top + (box.height - h) / 2, width: w, height: h };
-// }
+// الشريط في الجوال تحت الصورة: إن كان المنتج الكبير خارج الشاشة نصعد إليه أولاً ثم تبدأ الحركة
+async function ensureMainVisible() {
+  const r = main.getBoundingClientRect();
+  if (r.top >= 0 && r.bottom <= window.innerHeight) return;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  let last = -1, same = 0;
+  for (let i = 0; i < 30 && same < 3; i++) {
+    await new Promise(res => setTimeout(res, 50));
+    same = window.scrollY === last ? same + 1 : 0;
+    last = window.scrollY;
+  }
+}
 
-// // المستطيل الداخلي لصورة صغيرة (بعد الحشوة والإطار)، حيث تقع الصورة نفسها فعلياً
-// function innerRect(el) {
-//   const r = el.getBoundingClientRect();
-//   const cs = getComputedStyle(el);
-//   const n = k => parseFloat(cs[k]) || 0;
-//   const l = n('paddingLeft') + n('borderLeftWidth'), t = n('paddingTop') + n('borderTopWidth');
-//   const rr = n('paddingRight') + n('borderRightWidth'), b = n('paddingBottom') + n('borderBottomWidth');
-//   return { left: r.left + l, top: r.top + t, width: r.width - l - rr, height: r.height - t - b };
-// }
+// المستطيل الذي تشغله الصورة فعلياً داخل صندوق (object-fit: contain)
+function fitRect(box, img) {
+  const s = Math.min(box.width / img.naturalWidth, box.height / img.naturalHeight);
+  const w = img.naturalWidth * s, h = img.naturalHeight * s;
+  return { left: box.left + (box.width - w) / 2, top: box.top + (box.height - h) / 2, width: w, height: h };
+}
 
-// function placeFixed(el, r, z) {
-//   Object.assign(el.style, {
-//     position: 'fixed',
-//     left: r.left + 'px',
-//     top: r.top + 'px',
-//     width: r.width + 'px',
-//     height: r.height + 'px',
-//     maxWidth: 'none',
-//     margin: 0,
-//     zIndex: z,
-//     transformOrigin: 'top left',
-//     pointerEvents: 'none'
-//   });
-// }
+// المستطيل الداخلي لصورة صغيرة (بعد الحشوة والإطار)، حيث تقع الصورة نفسها فعلياً
+function innerRect(el) {
+  const r = el.getBoundingClientRect();
+  const cs = getComputedStyle(el);
+  const n = k => parseFloat(cs[k]) || 0;
+  const l = n('paddingLeft') + n('borderLeftWidth'), t = n('paddingTop') + n('borderTopWidth');
+  const rr = n('paddingRight') + n('borderRightWidth'), b = n('paddingBottom') + n('borderBottomWidth');
+  return { left: r.left + l, top: r.top + t, width: r.width - l - rr, height: r.height - t - b };
+}
 
-// // تحريك صورة طائرة من مستطيل إلى آخر (انتقال وتكبير/تصغير)
-// function fly(el, from, target) {
-//   return el.animate([
-//     { transform: 'translate(0, 0) scale(1, 1)' },
-//     { transform: `translate(${target.left - from.left}px, ${target.top - from.top}px) scale(${target.width / from.width}, ${target.height / from.height})` }
-//   ], { duration: DURATION, easing: 'ease-in-out', fill: 'forwards' }).finished;
-// }
+function placeFixed(el, r, z) {
+  Object.assign(el.style, {
+    position: 'fixed',
+    left: r.left + 'px',
+    top: r.top + 'px',
+    width: r.width + 'px',
+    height: r.height + 'px',
+    maxWidth: 'none',
+    margin: 0,
+    zIndex: z,
+    transformOrigin: 'top left',
+    pointerEvents: 'none'
+  });
+}
 
-// // التالي أو الضغط على صورة من الشريط (thumb):
-// //   الصورة تطير من مكانها إلى المنتصف، ويختفي مكانها من الشريط فيتقدم الدور، وصورة المنتصف القديمة تصعد وتتلاشى
-// //   وتظهر في نهاية الصف.
-// // السابق (بدون thumb): عكس ذلك تماماً: صورة المنتصف تعود إلى بداية الصف، والمنتج السابق ينزل من الأعلى
-// //   إلى المنتصف، ويتراجع الدور خطوة.
-// async function goTo(index, thumb) {
-//   if (busy || index === current || !products[index]) return;
-//   busy = true;
+// تحريك صورة طائرة من مستطيل إلى آخر (انتقال وتكبير/تصغير)
+function fly(el, from, target) {
+  return el.animate([
+    { transform: 'translate(0, 0) scale(1, 1)' },
+    { transform: `translate(${target.left - from.left}px, ${target.top - from.top}px) scale(${target.width / from.width}, ${target.height / from.height})` }
+  ], { duration: DURATION, easing: 'ease-in-out', fill: 'forwards' }).finished;
+}
 
-//   const next  = products[index];
-//   const prev  = products[current];
-//   const back  = !thumb;
-//   const small = isSmall();
-//   let flyer, mainAnim, waveAnim;
+// التالي أو الضغط على صورة من الشريط (thumb):
+//   الصورة تطير من مكانها إلى المنتصف، ويختفي مكانها من الشريط فيتقدم الدور، وصورة المنتصف القديمة تصعد وتتلاشى
+//   وتظهر في نهاية الصف.
+// السابق (بدون thumb): عكس ذلك تماماً: صورة المنتصف تعود إلى بداية الصف، والمنتج السابق ينزل من الأعلى
+//   إلى المنتصف، ويتراجع الدور خطوة.
+async function goTo(index, thumb) {
+  if (busy || index === current || !products[index]) return;
+  busy = true;
 
-//   try {
-//     if (small) await ensureMainVisible();
-//     const to = main.getBoundingClientRect();
-//     const { cx, cy, radius } = getGlowGeometry();
+  const next  = products[index];
+  const prev  = products[current];
+  const back  = !thumb;
+  const small = isSmall();
+  let flyer, mainAnim, waveAnim, galFade = null;
 
-//     // 1) الخلفية الجديدة: تتسع من وسط المنتج، وفي الشاشات الصغيرة تتبدل بتلاشٍ ناعم
-//     wave.style.setProperty('--glow', next.glow);
-//     wave.style.setProperty('--base', next.base);
-//     // ألوان النصوص (فاتحة/غامقة) تتبدل في منتصف الحركة مع اتساع الخلفية
-//     setTimeout(() => bg.classList.toggle('light', !!next.light), DURATION * 0.5);
-//     waveAnim = small
-//       ? wave.animate([
-//           { clipPath: 'inset(0)', opacity: 0 },
-//           { clipPath: 'inset(0)', opacity: 1 }
-//         ], { duration: DURATION + 200, easing: 'ease-in-out', fill: 'forwards' })
-//       : wave.animate([
-//           { clipPath: `circle(0px at ${cx}px ${cy}px)` },
-//           { clipPath: `circle(${radius}px at ${cx}px ${cy}px)` }
-//         ], { duration: DURATION, easing: 'ease-in-out', fill: 'forwards' });
+  try {
+    // إن كان الزائر يشاهد زاوية أخرى للمنتج: نعيد صورته الرئيسية قبل الحركة، وصور الزوايا تتلاشى
+    if (galleryIdx !== 0 || galleryAnim) {
+      gallerySwap++;
+      if (galleryAnim) { galleryAnim.cancel(); galleryAnim = null; }
+      galleryIdx = 0;
+      main.src = prev.url;
+      try { await main.decode(); } catch (e) {}
+    }
+    if (galleryBox && !galleryBox.hidden) {
+      galFade = galleryBox.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 300, easing: 'ease-in', fill: 'forwards' });
+    }
+    if (small) await ensureMainVisible();
+    const to = main.getBoundingClientRect();
+    const { cx, cy, radius } = getGlowGeometry();
 
-//     // 2) الصورة الكبيرة
-//     if (back) {
-//       // الرجوع: نسخة من الصورة الحالية تبدأ من مكانها، والصورة الكبيرة تتبدل للمنتج السابق وتنزل من الأعلى
-//       flyer = new Image();
-//       flyer.src = prev.url;
-//       placeFixed(flyer, fitRect(to, prev.img), 10);
-//       document.body.appendChild(flyer);
-//       main.src = next.url;
-//       mainAnim = main.animate([
-//         { transform: `translateY(${-to.height * 0.9}px)`, opacity: 0 },
-//         { transform: 'translateY(0)', opacity: 1 }
-//       ], { duration: DURATION, easing: 'ease-out', fill: 'backwards' });
-//     } else {
-//       // التالي: الصورة الحالية تصعد للأعلى وتزداد شفافيتها
-//       mainAnim = main.animate([
-//         { transform: 'translateY(0)', opacity: 1 },
-//         { transform: `translateY(${-to.height * 0.9}px)`, opacity: 0 }
-//       ], { duration: DURATION, easing: 'ease-in', fill: 'forwards' });
-//     }
+    // 1) الخلفية الجديدة: تتسع من وسط المنتج، وفي الشاشات الصغيرة تتبدل بتلاشٍ ناعم
+    wave.style.setProperty('--glow', next.glow);
+    wave.style.setProperty('--base', next.base);
+    // ألوان النصوص (فاتحة/غامقة) تتبدل في منتصف الحركة مع اتساع الخلفية
+    setTimeout(() => bg.classList.toggle('light', !!next.light), DURATION * 0.5);
+    waveAnim = small
+      ? wave.animate([
+          { clipPath: 'inset(0)', opacity: 0 },
+          { clipPath: 'inset(0)', opacity: 1 }
+        ], { duration: DURATION + 200, easing: 'ease-in-out', fill: 'forwards' })
+      : wave.animate([
+          { clipPath: `circle(0px at ${cx}px ${cy}px)` },
+          { clipPath: `circle(${radius}px at ${cx}px ${cy}px)` }
+        ], { duration: DURATION, easing: 'ease-in-out', fill: 'forwards' });
 
-//     // شارة العرض القديمة تتلاشى مع بدء الانتقال
-//     if (els.badge && !els.badge.hidden) {
-//       if (offerAnim) offerAnim.cancel();
-//       offerAnim = els.badge.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 250, fill: 'forwards' });
-//     }
+    // 2) الصورة الكبيرة
+    if (back) {
+      // الرجوع: نسخة من الصورة الحالية تبدأ من مكانها، والصورة الكبيرة تتبدل للمنتج السابق وتنزل من الأعلى
+      flyer = new Image();
+      flyer.src = prev.url;
+      placeFixed(flyer, fitRect(to, prev.img), 10);
+      document.body.appendChild(flyer);
+      main.src = next.url;
+      mainAnim = main.animate([
+        { transform: `translateY(${-to.height * 0.9}px)`, opacity: 0 },
+        { transform: 'translateY(0)', opacity: 1 }
+      ], { duration: DURATION, easing: 'ease-out', fill: 'backwards' });
+    } else {
+      // التالي: الصورة الحالية تصعد للأعلى وتزداد شفافيتها
+      mainAnim = main.animate([
+        { transform: 'translateY(0)', opacity: 1 },
+        { transform: `translateY(${-to.height * 0.9}px)`, opacity: 0 }
+      ], { duration: DURATION, easing: 'ease-in', fill: 'forwards' });
+    }
 
-//     const waits = [mainAnim.finished, waveAnim.finished];
+    // شارة العرض القديمة تتلاشى مع بدء الانتقال
+    if (els.badge && !els.badge.hidden) {
+      if (offerAnim) offerAnim.cancel();
+      offerAnim = els.badge.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 250, fill: 'forwards' });
+    }
 
-//     // النصوص تخرج (أو تتلاشى في الجوال) وتعود ببيانات المنتج الجديد
-//     const textPromise = swapText(next).catch(err => console.error(err));
+    const waits = [mainAnim.finished, waveAnim.finished];
 
-//     // 3) الصورة الطائرة والشريط
-//     const thumbBox = back ? null : innerRect(thumb);          // نقيسها قبل أن يتغير الشريط
-//     const stripPromise = updateStrip(index, thumb || null, back ? current : -1);
+    // النصوص تخرج (أو تتلاشى في الجوال) وتعود ببيانات المنتج الجديد
+    const textPromise = swapText(next).catch(err => console.error(err));
 
-//     if (back) {
-//       // تعود إلى مكانها الجديد في بداية الشريط
-//       const slot = strip.querySelector(`img[data-index="${current}"]`);
-//       if (slot) waits.push(fly(flyer, fitRect(to, prev.img), fitRect(innerRect(slot), prev.img)));
-//       else { flyer.remove(); flyer = null; }
-//     } else {
-//       // تطير من مكانها في الشريط إلى مكان وحجم صورة المنتصف
-//       flyer = new Image();
-//       flyer.src = next.url;
-//       const from = fitRect(thumbBox, next.img);
-//       placeFixed(flyer, from, 10);
-//       document.body.appendChild(flyer);
-//       waits.push(fly(flyer, from, fitRect(to, next.img)));
-//     }
+    // 3) الصورة الطائرة والشريط
+    const thumbBox = back ? null : innerRect(thumb);          // نقيسها قبل أن يتغير الشريط
+    const stripPromise = updateStrip(index, thumb || null, back ? current : -1);
 
-//     await Promise.all(waits);
+    if (back) {
+      // تعود إلى مكانها الجديد في بداية الشريط
+      const slot = strip.querySelector(`img[data-index="${current}"]`);
+      if (slot) waits.push(fly(flyer, fitRect(to, prev.img), fitRect(innerRect(slot), prev.img)));
+      else { flyer.remove(); flyer = null; }
+    } else {
+      // تطير من مكانها في الشريط إلى مكان وحجم صورة المنتصف
+      flyer = new Image();
+      flyer.src = next.url;
+      const from = fitRect(thumbBox, next.img);
+      placeFixed(flyer, from, 10);
+      document.body.appendChild(flyer);
+      waits.push(fly(flyer, from, fitRect(to, next.img)));
+    }
 
-//     // نثبّت الصورة الأساسية والخلفية الجديدة
-//     if (!back) main.src = next.url;
-//     setBackground(next);
-//     mainAnim.cancel();
-//     waveAnim.cancel();
-//     if (flyer) { flyer.remove(); flyer = null; }
+    await Promise.all(waits);
 
-//     current = index;
-//     updateGlowCenter();
+    // نثبّت الصورة الأساسية والخلفية الجديدة
+    if (!back) main.src = next.url;
+    setBackground(next);
+    mainAnim.cancel();
+    waveAnim.cancel();
+    if (flyer) { flyer.remove(); flyer = null; }
 
-//     // ننتظر انتهاء بقية الحركات: النصوص والشريط
-//     await Promise.all([textPromise, stripPromise]);
-//   } catch (err) {
-//     console.error(err);
-//   } finally {
-//     // مهما حصل: نفتح القفل ونزيل الصورة الطائرة
-//     if (flyer) flyer.remove();
-//     busy = false;
-//   }
-// }
+    current = index;
+    updateGlowCenter();
+    if (galFade) { galFade.cancel(); galFade = null; }
+    setGallery(next.gallery).catch(err => console.error(err));   // زوايا المنتج الجديد
 
-// // السهم الأيمن (يشير لليمين) = التالي: أول صورة في الشريط. السهم الأيسر (يشير لليسار) = السابق: المنتج الذي قبل الحالي
-// btnPrev.addEventListener('click', () => {
-//   const first = strip.firstElementChild;
-//   if (first) goTo(Number(first.dataset.index), first);
-// });
-// btnNext.addEventListener('click', () => {
-//   if (products.length > 1) goTo((current - 1 + products.length) % products.length, null);
-// });
- 
- 
+    // ننتظر انتهاء بقية الحركات: النصوص والشريط
+    await Promise.all([textPromise, stripPromise]);
+  } catch (err) {
+    console.error(err);
+  } finally {
+    // مهما حصل: نفتح القفل ونزيل الصورة الطائرة
+    if (flyer) flyer.remove();
+    if (galFade) galFade.cancel();
+    busy = false;
+  }
+}
+
+// السهم الأيمن (يشير لليمين) = التالي: أول صورة في الشريط. السهم الأيسر (يشير لليسار) = السابق: المنتج الذي قبل الحالي
+btnPrev.addEventListener('click', () => {
+  const first = strip.firstElementChild;
+  if (first) goTo(Number(first.dataset.index), first);
+});
+btnNext.addEventListener('click', () => {
+  if (products.length > 1) goTo((current - 1 + products.length) % products.length, null);
+});
+
+
 /* ---------- التشغيل ---------- */
- 
+
 async function initCore() {
   const list = (typeof PRODUCTS !== 'undefined' && Array.isArray(PRODUCTS)) ? PRODUCTS : [];
   if (!list.length) {
-    console.warn('قائمة PRODUCTS فارغة أو غير موجودة. تأكد من ملف products.js');
-    applyPageOffer();   // متجر بمنتج واحد: شارة العرض من PAGE_OFFER
-    setGallery(typeof PAGE_GALLERY !== 'undefined' ? PAGE_GALLERY : []).catch(err => console.error(err));   // وصور المعرض من PAGE_GALLERY
+    // لا منتجات في لوحة التحكم (أو تعذّر الاتصال): تبقى الصفحة كما هي في index.html
+    if (els.badge) els.badge.hidden = true;
     return;
   }
- 
+
   const results = await Promise.allSettled(list.map(item => {
     const src = typeof item === 'string' ? item : item && item.src;
     return src ? loadImage(src) : Promise.reject(new Error('منتج بدون مسار صورة (src)'));
   }));
- 
+
   results.forEach((res, i) => {
     if (res.status === 'fulfilled') products.push(buildProduct(list[i], products.length, res.value));
     else console.warn('تم تجاهل منتج:', res.reason.message);
   });
- 
+
   if (!products.length) return;
- 
+
   // المنتج الأول هو الذي يظهر عند فتح الموقع
   if (main.src !== products[0].url) main.src = products[0].url;
   setBackground(products[0]);
   applyText(products[0]);
+  reserveGallery = products.some(p => p.gallery.length);
+  setGallery(products[0].gallery).catch(err => console.error(err));
   updateImageGap();
   renderStrip();
   lockLayoutHeight();
   updateGlowCenter();
 }
- 
+
 /* ---------- حركة دخول الصفحة ----------
    النصوص تدخل من الجانبين، المنتج من الأسفل، والشريط السفلي من الأسفل
    (نفس حركة أسهم التالي والسابق). في الجوال: ظهور تدريجي من الأسفل. */
@@ -992,7 +1058,7 @@ async function playIntro() {
       [els.name, els.desc, document.querySelector('.text button'),
        document.querySelector('.alsaer'), document.querySelector('.overlay')]
         .forEach((el, i) => rise(el, 30, 350 + i * 90, 700));
-      [document.querySelector('.carousel'), document.querySelector('.taosel'), document.querySelector('.tauasul')]
+      [document.querySelector('.carousel'), document.querySelector('.tauasul')]
         .forEach((el, i) => rise(el, 120, 300 + i * 80, 800));
     }
   }
@@ -1003,10 +1069,10 @@ async function playIntro() {
 }
 
 async function init() {
-  // بيانات المنتج من لوحة التحكم (store.js): إن لم تتوفر تبقى الصفحة كما هي
+  // بيانات المنتجات من لوحة التحكم (store.js): إن لم تتوفر تبقى الصفحة كما هي
   try {
-    const sp = window.STORE_READY ? await window.STORE_READY : null;
-    if (sp && window.applyStoreProduct) await window.applyStoreProduct(sp);
+    const data = window.STORE_READY ? await window.STORE_READY : null;
+    if (data && window.applyStoreData) window.applyStoreData(data);
   } catch (err) { console.error(err); }
   try { await initCore(); } catch (err) { console.error(err); }
   await hideLoader();
@@ -1014,18 +1080,19 @@ async function init() {
 }
 
 init();
- 
- 
+
+
 /* ======================================================
    طبقة الطلب (تظهر عند الضغط على "اطلب الان")
    الهاتف يتولاه phone.js (input, getE164, getFinalPhone, checkPhone)
    ====================================================== */
- 
+
 // سعر صرف الدولار مقابل الليرة السورية (بالعملة القديمة، سعر المبيع في السوق).
 // ترتيب المصادر عند تحميل الصفحة:
-//   1) LiraScope API مباشرة (سعر السوق، مجاني وبلا مفتاح)
-//   2) ملف rates.json (تعدّله يدوياً أو يحدّثه n8n)
-//   3) الرقم الاحتياطي أدناه
+//   1) دالة Supabase (rate) التي تجلب سعر السوق من LiraScope من جهة الخادم
+//   2) LiraScope مباشرة
+//   3) السعر اليدوي الذي يكتبه المشرف في لوحة التحكم
+//   4) آخر سعر ناجح محفوظ في المتصفح، ثم الرقم الاحتياطي أدناه
 const FALLBACK_USD_TO_SYP = 14330;
 const RATE_API_URL = 'https://lirascope.syria-cloud.sy/api/v1/rates/latest?currencies=USD&lang=en';
 const OLD_PER_NEW  = 100;     // الليرة الجديدة = 100 قديمة (الـ API يعطي الجديدة)
@@ -1093,13 +1160,6 @@ async function loadRate() {
       console.warn('تعذّر قراءة السعر اليدوي:', err.message);
     }
   }
-  // 4) rates.json
-  try {
-    const data = await fetchJson('rates.json?t=' + Date.now(), 5000);
-    if (acceptRate(Number(data.usdToSyp), 'rates.json')) return;
-  } catch (err) {
-    console.warn('تعذّر قراءة rates.json، سيُستخدم آخر سعر محفوظ أو الاحتياطي:', err.message);
-  }
 }
 loadRate();
 
@@ -1112,19 +1172,11 @@ function refreshRate(minGapMs) {
 }
 setInterval(() => refreshRate(0), 5 * 60 * 1000);
 document.addEventListener('visibilitychange', () => { if (!document.hidden) refreshRate(60 * 1000); });
- 
+
 // ===== رابط Google Sheets (تطبيق الويب Apps Script) =====
 // الصق هنا الرابط الذي يعطيك إياه Google بعد نشر الملف google-apps-script.gs (ينتهي بـ /exec).
 // خطوات الربط مكتوبة في أعلى ملف google-apps-script.gs
 const SHEET_URL = 'https://script.google.com/macros/s/AKfycbz0vNw17CbnxR3p7xGs77ZwuFfBw1e94n9ItKVHNo3leDQLeMXjhUuZl_M45-3tzmBk/exec';
-
-// --- إرسال واتساب (معطّل: محفوظ كتعليق) ---
-// رقم واتساب الذي يستقبل الطلبات (بدون + وبدون مسافات)
-// const WHATSAPP_NUMBER = '40722719456';
-
-
-
-
 
 const orderBtn    = document.querySelector('.text button');
 const orderOverlay = document.getElementById('orderOverlay');
@@ -1137,64 +1189,63 @@ const qtyVal       = document.getElementById('qtyVal');
 const orderOk      = document.getElementById('orderOk');
 const orderErr     = document.getElementById('orderErr');
 const submitBtn    = orderForm.querySelector('.order-submit');
- 
+
 let orderQty = 1;
 
 
- 
+
 /* --- فتح وإغلاق --- */
- 
+
 function openOrder() {
   refreshRate(30 * 1000);   // سعر محدّث عند فتح نافذة الطلب
   fillSummary();
   orderOk.hidden = true;
   orderErr.hidden = true;
-  // smsLink.hidden = true;   // (SMS معطّل)
   orderOverlay.scrollTop = 0;
   orderOverlay.classList.add('open');
   orderOverlay.setAttribute('aria-hidden', 'false');
   document.body.classList.add('no-scroll');
 }
- 
+
 function closeOrder() {
   orderOverlay.classList.remove('open');
   orderOverlay.setAttribute('aria-hidden', 'true');
   document.body.classList.remove('no-scroll');
 }
- 
+
 orderBtn.addEventListener('click', openOrder);
 orderClose.addEventListener('click', closeOrder);
- 
+
 // "الرئيسية" في الشريط العلوي تغلق الطبقة وتعود للصفحة
 orderOverlay.querySelector('.navbar ul li:first-child a').addEventListener('click', e => {
   e.preventDefault();
   closeOrder();
 });
- 
+
 // الضغط على الخلفية الضبابية (خارج الشريط والنموذج والملخص) يغلق الطبقة
 orderOverlay.addEventListener('click', e => {
   if (!e.target.closest('.navbar, .order-form, .order-summary')) closeOrder();
 });
- 
+
 // Escape يغلق الطبقة، إلا إذا كان يغلق قائمة الدول فقط (phone.js يمنع الحدث وقتها)
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape' && !e.defaultPrevented) closeOrder();
 });
- 
- 
+
+
 /* --- ملخص الطلب: يُقرأ من المنتج المعروض وقت فتح الطبقة --- */
- 
+
 function readPrice() {
   const n = parseFloat((els.price ? els.price.textContent : '').replace(/[^\d.]/g, ''));
   return isNaN(n) ? 0 : n;
 }
- 
+
 function fillSummary() {
   document.getElementById('sumImg').src = main.src;
   document.getElementById('sumName').textContent = els.name ? els.name.textContent : '';
   document.getElementById('sumOld').textContent  = els.oldPrice ? els.oldPrice.textContent : '';
   document.getElementById('sumNew').textContent  = els.price ? els.price.textContent : '';
- 
+
   // لون الطبقة والنموذج = لون خلفية الصفحة المعروضة حالياً (خلفية المنتج)
   const cs   = getComputedStyle(bg);
   const cur  = products[current];
@@ -1205,17 +1256,17 @@ function fillSummary() {
   orderOverlay.classList.toggle('tone-dark', dark);
   if (glow) orderOverlay.style.setProperty('--glow', dark ? '#33406b' : glow);
   if (base) orderOverlay.style.setProperty('--base', dark ? '#1b2340' : base);
- 
+
   updateTotals();
 }
- 
- 
+
+
 /* --- الكمية والإجمالي --- */
- 
+
 function totalUsd() {
   return Math.round(readPrice() * orderQty * 100) / 100;
 }
- 
+
 function updateTotals() {
   const usd = totalUsd();
   const syp = Math.round(usd * USD_TO_SYP);
@@ -1225,24 +1276,24 @@ function updateTotals() {
   const rn = document.getElementById('rateNote');
   if (rn) rn.textContent = 'سعر الصرف المعتمد: 1$ = ' + Math.round(USD_TO_SYP).toLocaleString('en-US') + ' ل.س' + (rateSource === 'manual' ? ' (سعر محدّد من المتجر)' : '');
 }
- 
+
 document.getElementById('qtyMinus').addEventListener('click', () => {
   if (orderQty > 1) { orderQty--; updateTotals(); }
 });
 document.getElementById('qtyPlus').addEventListener('click', () => {
   if (orderQty < MAX_QTY) { orderQty++; updateTotals(); }
 });
- 
- 
+
+
 /* --- التحقق من بقية الحقول (الهاتف يتحقق منه phone.js) --- */
- 
+
 function setFieldError(el, message) {
   const field = el.closest('.field');
   field.classList.toggle('invalid', !!message);
   field.querySelector('.err').textContent = message || '';
   return !message;
 }
- 
+
 function validateOrder() {
   const okName  = setFieldError(fName, fName.value.trim().length >= 3 ? '' : 'اكتب اسمك الكامل');
   const okPhone = checkPhone();
@@ -1256,12 +1307,23 @@ function validateOrder() {
   return all;
 }
 
+// خانة العنوان: بارتفاع خانة الاسم، وتكبر مع كل سطر جديد (حتى حد أقصى ثم يظهر التمرير)
+function autoGrow() {
+  fAddr.style.height = '';                       // العودة للارتفاع الأساسي ثم القياس
+  if (!fAddr.value) { fAddr.style.overflowY = 'hidden'; return; }
+  const h = Math.min(fAddr.scrollHeight + 2, 200);
+  fAddr.style.height = h + 'px';
+  fAddr.style.overflowY = fAddr.scrollHeight + 2 > 200 ? 'auto' : 'hidden';
+}
+fAddr.addEventListener('input', autoGrow);
+window.addEventListener('resize', autoGrow);
+
 [fName, fGov, fAddr].forEach(el => {
   el.addEventListener('input', () => setFieldError(el, ''));
   el.addEventListener('change', () => setFieldError(el, ''));
 });
- 
- 
+
+
 /* --- الإرسال إلى Google Sheets --- */
 
 let sending = false;
@@ -1293,6 +1355,7 @@ function resetOrderForm() {
   fName.value = '';
   fGov.value = '';
   fAddr.value = '';
+  autoGrow();
   orderQty = 1;
   try { input.value = ''; refresh(); } catch (e) {}   // خانة الهاتف (phone.js)
   updateTotals();
@@ -1343,60 +1406,3 @@ orderForm.addEventListener('submit', async e => {
     submitBtn.textContent = label;
   }
 });
-
-
-/* =====================================================================
-   إرسال الطلب عبر واتساب و SMS — معطّل ومحفوظ كتعليق
-   لإعادته: احذف علامتَي التعليق (السطر الذي يلي هذا التعليق وآخر سطر في الملف) حول هذه الكتلة، وأعد تفعيل السطر
-   const WHATSAPP_NUMBER في الأعلى، وأعد سطر smsLink.hidden = true في openOrder،
-   وأزل التعليق عن <a id="smsFallback"> في index.html، ثم اجعل معالج submit
-   يستدعي buildWhatsAppUrl(order) بدل sendOrderToSheet.
-   ===================================================================== */
-/*
-function buildWhatsAppUrl(o) {
-  const lines = [
-    '',
-    '',
-    'المنتج: ' + o.product,
-    'الكمية: ' + o.quantity,
-    'الإجمالي: ' + o.totalUsd + '$ (' + o.totalSyp.toLocaleString('en-US') + ' ل.س)',
-    '',
-    'الاسم: ' + o.name,
-    'الهاتف: ' + o.phoneDisplay,
-    'المحافظة: ' + o.governorate,
-    'العنوان: ' + o.address,
-    'الدفع: عند الاستلام'
-  ];
-  return 'https://wa.me/' + WHATSAPP_NUMBER + '?text=' + encodeURIComponent(lines.join('\n'));
-}
-
-// الرقم الذي يستقبل رسائل SMS (بصيغة دولية مع +)
-const SMS_NUMBER = '+40722719456';
-
-// نسخة مختصرة من الرسالة: الـ SMS بالعربية يُحتسب كل 70 حرفاً تقريباً برسالة مستقلة
-function buildSmsUrl(o) {
-  const lines = [
-    'طلب جديد',
-    'المنتج: ' + o.product,
-    'الكمية: ' + o.quantity,
-    'الإجمالي: ' + o.totalUsd + '$',
-    'الاسم: ' + o.name,
-    'الهاتف: ' + o.phoneDisplay,
-    'العنوان: ' + o.address
-  ];
-  return 'sms:' + SMS_NUMBER + '?&body=' + encodeURIComponent(lines.join('\n'));
-}
-
-const smsLink  = document.getElementById('smsFallback');
-const isMobile = window.matchMedia('(pointer: coarse)').matches;   // الروابط sms: لا تعمل على الحاسوب
-
-// داخل معالج submit بدل sendOrderToSheet:
-//   const url = buildWhatsAppUrl(order);
-//   const w = window.open(url, '_blank');
-//   if (!w) window.location.href = url;   // إن منع المتصفح النافذة الجديدة
-//   orderOk.hidden = false;
-//   if (isMobile) {
-//     smsLink.href = buildSmsUrl(order);
-//     smsLink.hidden = false;
-//   }
-*/

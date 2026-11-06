@@ -1,5 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@200..1000&display=swap');
- 
+
 *{
     padding: 0;
     margin: 0;
@@ -9,15 +9,15 @@
     text-decoration: none;
     font-family: 'cairo';
 }
- 
+
 body{
     /* background: #0000c8; */
     overflow-x: hidden;
 }
- 
- 
+
+
 /* ========== الصفحة والخلفية ========== */
- 
+
 .shamelll{
     /* ألوان التدرج، يغيّرها الـ JS عند تبديل المنتج */
     --glow: #ffffff;   /* لون التوهج في الوسط (أبيض) */
@@ -25,7 +25,7 @@ body{
     /* مركز التوهج: يضبطه الـ JS ليكون خلف صورة المنتج */
     --cx: 50%;
     --cy: 50%;
- 
+
     position: relative;
     overflow: hidden;
     display: flex;
@@ -36,7 +36,7 @@ body{
     font-family: 'Cairo', sans-serif;
     padding-bottom: 40px;
 }
- 
+
 /* نفس التدرج للخلفية الأساسية وللموجة المتسعة */
 .shamelll,
 .bg-wave{
@@ -44,7 +44,7 @@ body{
         radial-gradient(circle at var(--cx) var(--cy), rgba(255,255,255,0.22) 0, rgba(255,255,255,0) 32vmax),
         radial-gradient(circle farthest-corner at var(--cx) var(--cy), var(--glow) 0%, var(--base) 75%);
 }
- 
+
 .bg-wave{
     position: absolute;
     inset: 0;
@@ -52,7 +52,7 @@ body{
     pointer-events: none;
     clip-path: circle(0px at 50% 50%);
 }
- 
+
 .safhaon{
     position: relative;
     z-index: 1;
@@ -63,10 +63,10 @@ body{
     justify-content: space-between;
     gap: 20px;
 }
- 
- 
+
+
 /* ========== الرأسية ========== */
- 
+
 .navbar{
     display: flex;
     justify-content: space-between;
@@ -74,17 +74,17 @@ body{
     flex-wrap: wrap;
     gap: 10px;
 }
- 
+
 .navbar a{
     font-size: 30px;
     font-weight: 700;
     color: #fff;
 }
- 
+
 .navbar ul li{
     display: inline-block;
 }
- 
+
 .navbar ul li a{
     position: relative;
     padding: 4px 0;
@@ -93,7 +93,7 @@ body{
     margin: 0 15px;
     transition: opacity 0.3s;
 }
- 
+
 /* خط يتمدد تحت الرابط (نفس تنسيق روابط الفوتر) */
 .navbar ul li a::after{
     content: '';
@@ -106,16 +106,16 @@ body{
     background: #fff;
     transition: width 0.3s;
 }
- 
+
 @media (hover: hover){
     .navbar ul li a:hover{ opacity: 0.85; }
     .navbar ul li a:hover::after{ width: 100%; }
 }
- 
- 
- 
+
+
+
 /* ========== المحتوى ========== */
- 
+
 .mohtaoa{
     flex: 1;
     display: flex;
@@ -123,13 +123,19 @@ body{
     align-items: center;
     gap: 20px;
 }
- 
-/* اليمين: النص */
+
+/* اليمين: النص — العمودان الجانبيان متساويان ليبقى المنتج في منتصف الشاشة أفقياً */
 .text{
-    /* width: 28%; */
-    flex: 0 1 28%;
+    /* flex: 1 1 0;
+    min-width: 0; */
+    width: 28%;
 }
- 
+.maizat{
+    /* flex: 1 1 0;
+    min-width: 0; */
+    width: 25%;
+}
+
 .text h1{
     font-size: clamp(26px, 3vw, 32px);
     font-weight: 600;
@@ -137,14 +143,14 @@ body{
     line-height: 1.5;
     margin: 20px 0;
 }
- 
+
 .text p{
     color: #fff;
     font-size: 16px;
     font-weight: 500;
     margin: 20px 0;
 }
- 
+
 .text button{
     padding: 8px 60px;
     color: rgb(65, 64, 64);
@@ -157,7 +163,7 @@ body{
     font-family: inherit;
     animation: zxzxz 2s infinite;
 }
- 
+
 /* الوسط: صورة المنتج (حتى 550px وتصغر حسب الشاشة) */
 .imgs{
     /* width: 40%; */
@@ -168,7 +174,7 @@ body{
     display: flex;
     justify-content: center;
 }
- 
+
 .imgs img{
     width: 100%;
     display: block;
@@ -177,12 +183,12 @@ body{
     filter: drop-shadow(0 25px 30px rgba(0, 0, 0, 0.3));
     animation: xxxxx 2s ease-in-out infinite;
 }
- 
+
 /* اليسار: السعر والميزات */
 /* .maizat{
     flex: 0 1 28%;
 } */
- 
+
 .alsaer{
     margin-bottom: 40px;
     color: #fff;
@@ -190,20 +196,20 @@ body{
     font-weight: 400;
     line-height: 1.5;
 }
- 
+
 .alsaer .kdem{
     text-decoration: line-through;
     text-decoration-thickness: 2px;
 }
- 
+
 .alsaer .jaaded span{
     font-size: 18px;
 }
- 
+
 .alsaer .jaaded .price{
     font-weight: inherit;
 }
- 
+
 /* الميزات: كل ميزة في صندوق بخلفية شفافة (نفس تنسيق صناديق طبقة تأكيد الطلب) بعرض القسم كاملاً */
 .overlay ul{
     width: 100%;
@@ -211,7 +217,7 @@ body{
     flex-direction: column;
     gap: 10px;
 }
- 
+
 .overlay ul li{
     display: flex;
     align-items: center;
@@ -226,7 +232,7 @@ body{
     line-height: 1.7;
     text-align: start;
 }
- 
+
 /* نقطة صغيرة بدل رمز القائمة الافتراضي */
 .overlay ul li::before{
     content: '';
@@ -237,70 +243,67 @@ body{
     background: #fff;
     opacity: 0.85;
 }
- 
- 
+
+
 /* ========== ذيل الصفحة ========== */
- 
+
 .thelsafhaon{
     display: flex;
-    justify-content: center;
+    justify-content: space-between;
     align-items: center;
-    /* gap: 20px; */
+    gap: 20px;
 }
- 
-/* .thelsafhaon .tauasul{
+
+.thelsafhaon .tauasul{
     flex: none;
 }
- 
-.thelsafhaon .taosel{
-    flex: 1 1 140px;
-    text-align: center;
-}
- 
-.thelsafhaon .taosel p{
-    font-size: 20px;
-    font-weight: 600;
-} */
- 
- 
+
+
 /* ----- شريط المنتجات (حلقة من 5 صور + سهمان) ----- */
- 
-/* .carousel{
+
+/* عرض الشريط على قد محتواه: صورة واحدة = على قدها، وأكبر عرض له 5 صور */
+.carousel{
     display: flex;
     align-items: center;
     gap: 8px;
-    flex: 0 1 540px;
+    flex: 0 1 auto;
+    max-width: 100%;
     min-width: 0;
 }
- 
+.carousel[hidden]{ display: none; }
+
 .icon{
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
-    flex: 1;
+    flex: 0 1 auto;
     min-width: 0;
 }
- 
+
+/* كل صورة في خانة مربعة ثابتة، فلا تختلف أحجامها باختلاف أبعاد صور المنتجات */
 .icon img{
-    flex: 1 1 0;
+    flex: 0 1 88px;
+    width: 88px;
     min-width: 0;
-    max-width: 105px;
-    width: auto;
+    aspect-ratio: 1 / 1;
+    object-fit: contain;
+    padding: 8px;
+    border-radius: 12px;
     height: auto;
     cursor: pointer;
     opacity: 0.8;
     user-select: none;
     -webkit-user-drag: none;
     transition: transform 0.4s, opacity 0.3s, filter 0.3s;
-} */
- 
+}
+
 /* المنتج المعروض حالياً في المنتصف */
 .icon img.active{
     opacity: 1;
     cursor: default;
 }
- 
+
 /* السهمان */
 .nav-btn{
     flex: none;
@@ -315,28 +318,21 @@ body{
     cursor: pointer;
     transition: background-color 0.3s, transform 0.2s;
 }
- 
+
 .nav-btn:hover{
     background-color: rgba(18, 18, 18, 0.45);
 }
- 
+
 .nav-btn:active{
     transform: scale(0.9);
 }
- 
+
 .nav-btn[hidden]{
     display: none;
 }
- 
-/* .tauasul a i{
-    font-size: 24px;
-    color: #fff;
-    margin-left: 30px;
-    font-weight: 400;
-} */
 
 .tauasul{
-        display: flex;
+    display: flex;
     justify-content: center;
     gap: 12px;
 }
@@ -353,12 +349,7 @@ body{
     border: 1px solid rgba(255, 255, 255, .35);
     transition: background-color .3s, color .3s, transform .3s, border-color .3s;
 }
- 
-.taosel p{
-    font-size: 18px;
-    color: #fff;
-}
- 
+
 /* التكبير عند المرور فقط في الأجهزة التي تدعم الماوس */
 @media (hover: hover){
     .icon img:hover{
@@ -368,8 +359,8 @@ body{
         z-index: 2;
     }
 }
- 
- 
+
+
 /* ========== التاب والجوال: ترتيب عمودي ========== */
 
 @media (max-width: 900px){
@@ -442,15 +433,18 @@ body{
     .safhaon .text button{ order: 5; align-self: center; margin: 16px 0; }
 
     /* شريط المنتجات: بدون أسهم، يمرَّر باللمس، وكل صورة لها خلفية شفافة ضبابية */
+    /* عرض الشريط على قد عدد الصور (--n يضبطه ronq.js)، وأكبر عرض له عرض الصفحة */
     .safhaon .carousel{
+        --tile: calc((min(92vw, 620px) - 20px) / 2.5);
         order: 6;
         flex: none;
-        width: 100%;
+        width: min(100%, calc(var(--n, 3) * var(--tile) + (var(--n, 3) - 1) * 10px));
         max-width: 620px;
     }
     .carousel .nav-btn{ display: none; }
 
     .icon{
+        flex: 1 1 0;
         display: flex;
         justify-content: flex-start;
         align-items: stretch;
@@ -467,7 +461,8 @@ body{
 
     /* عرض الصورة = (العرض − الفراغات) ÷ 2.5 : صورتان كاملتان ونصف الثالثة للدلالة على التمرير */
     .icon img{
-        flex: 0 0 calc((100% - 20px) / 2.5);
+        flex: 0 0 var(--tile);
+        width: var(--tile);
         min-width: 0;
         max-width: none;
         height: auto;
@@ -491,13 +486,10 @@ body{
         text-align: start;
     }
 
-    .taosel{ order: 8; text-align: center; }
-
     /* أيقونات التواصل مخفية في الشاشات الصغيرة بكل تنسيقاتها */
     .tauasul{ display: none; }
 
     /* الشريط السفلي فارغ (الجافاسكربت معطّل): نخفيه حتى لا يضيف مسافة زائدة */
-    .carousel:empty{ display: none; }
 }
 
 @media (max-width: 600px){
@@ -525,56 +517,47 @@ body{
         padding: 9px 12px;
     }
 
-    .taosel p{
-        font-size: 16px;
-        margin: 30px 0;
-    }
-
-    .tauasul a i{
-        font-size: 22px;
-        margin: 0 12px;
-        display: none;
-    }
 }
 
 
 /* حركة الانميشن الخاصة بالصورة */
- 
- 
- 
+
+
+
 @keyframes xxxxx {
     0%,
     100% {
         transform: translatey(5px);
     }
- 
+
     50% {
         transform: translatey(-5px);
     }
 }
- 
- 
+
+
 @keyframes zxzxz {
   50% {
     opacity: 0.5;
   }
 }
- 
- 
+
+
 /* ========== طبقة الطلب (شفافة وضبابية بلون خلفية المنتج) ========== */
- 
+
 .maalomataltalab{
     /* ألوان افتراضية (نفس أزرق الصفحة)، يضبطها الـ JS من خلفية المنتج المعروض عند الفتح */
     /* --glow: #1a6fff;
     --base: #0000c8; */
- 
+
     position: fixed;
     inset: 0;
     z-index: 100;
     display: flex;
+    align-items: flex-start;   /* الصفحة تأخذ طول محتواها (لا تُقصّ عند حافة الشاشة) فتبقى المسافة السفلية للنموذج */
     overflow-y: auto;
     font-family: 'Cairo', sans-serif;
- 
+
     /* احتياطي للمتصفحات القديمة التي لا تدعم color-mix */
     background: rgba(0, 0, 40, 0.72);
     /* لون المنتج نفسه بشفافية: توهج خفيف في الجانبين وحواف أغمق */
@@ -584,30 +567,30 @@ body{
         color-mix(in srgb, var(--base) 80%, transparent);
     -webkit-backdrop-filter: blur(16px);
     backdrop-filter: blur(16px);
- 
+
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
     transition: opacity 0.4s ease, visibility 0s linear 0.4s;
 }
- 
+
 .maalomataltalab.open{
     opacity: 1;
     visibility: visible;
     pointer-events: auto;
     transition: opacity 0.4s ease, visibility 0s;
 }
- 
+
 .maalomataltalab input,
 .maalomataltalab select,
 .maalomataltalab button{
     font-family: inherit;
 }
- 
+
 body.no-scroll{
     overflow: hidden;
 }
- 
+
 /* نفس عرض صفحتك الرئيسية: الشريط العلوي ثم المحتوى في المنتصف */
 .order-page{
     position: relative;
@@ -615,12 +598,12 @@ body.no-scroll{
     min-height: 100vh;
     min-height: 100svh;
     margin: 0 auto;
-    padding: 15px 0 24px;
+    padding: 15px 0 64px;      /* مسافة سفلية كافية: النموذج لا يلتصق بحافة الصفحة */
     display: flex;
     flex-direction: column;
     gap: 20px;
 }
- 
+
 .order-box{
     flex: 1;
     display: flex;
@@ -629,11 +612,11 @@ body.no-scroll{
     transform: translateY(30px) scale(0.97);
     transition: transform 0.4s ease;
 }
- 
+
 .maalomataltalab.open .order-box{
     transform: translateY(0) scale(1);
 }
- 
+
 /* الملخص يسار والنموذج يمين، والمحتوى كله في المنتصف مع مسافة واضحة بينهما */
 .order-layout{
     width: 100%;
@@ -645,14 +628,14 @@ body.no-scroll{
     gap: clamp(48px, 8vw, 110px);
     direction: ltr;
 }
- 
+
 .order-layout > *{
     direction: rtl;
 }
- 
- 
+
+
 /* ===== ملخص الطلب (بدون خلفية متوهجة) ===== */
- 
+
 .order-summary{
     flex: 1 1 460px;
     min-width: 0;
@@ -663,7 +646,7 @@ body.no-scroll{
     text-align: center;
     color: #fff;
 }
- 
+
 .sum-img{
     position: relative;
     width: 100%;
@@ -673,7 +656,7 @@ body.no-scroll{
     /* ارتفاع محدد: أي صورة أكبر منه تصغر تلقائياً ولا تدفع العناصر التي تحتها */
     height: clamp(170px, 36vh, 260px);
 }
- 
+
 /* ظل ناعم تحت المنتج وهو يطفو */
 .sum-img::after{
     content: '';
@@ -686,7 +669,7 @@ body.no-scroll{
     border-radius: 50%;
     background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.35) 0, rgba(0, 0, 0, 0) 70%);
 }
- 
+
 /* صورة المنتج كبيرة */
 .sum-img img{
     position: relative;
@@ -699,39 +682,39 @@ body.no-scroll{
     filter: drop-shadow(0 20px 24px rgba(0, 0, 0, 0.3));
     animation: xxxxx 2s ease-in-out infinite;
 }
- 
+
 .sum-info h3{
     font-size: 22px;
     font-weight: 600;
     line-height: 1.4;
     margin-bottom: 10px;
 }
- 
+
 .sum-price{
     display: flex;
     justify-content: center;
     align-items: baseline;
     gap: 14px;
 }
- 
+
 .sum-old{
     font-size: 18px;
     text-decoration: line-through;
     text-decoration-thickness: 2px;
     opacity: 0.7;
 }
- 
+
 .sum-price strong{
     font-size: 38px;
     font-weight: 700;
 }
- 
+
 .sum-ship{
     margin-top: 4px;
     font-size: 14px;
     opacity: 0.85;
 }
- 
+
 .sum-badges{
     width: 100%;
     max-width: 400px;
@@ -739,7 +722,7 @@ body.no-scroll{
     flex-direction: column;
     gap: 10px;
 }
- 
+
 .sum-badges li{
     display: flex;
     align-items: center;
@@ -750,7 +733,7 @@ body.no-scroll{
     background: rgba(255, 255, 255, 0.07);
     border: 1px solid rgba(255, 255, 255, 0.12);
 }
- 
+
 /* أيقونات مفرغة الخلفية بإطار أبيض فقط */
 .sum-badges .ic{
     flex: none;
@@ -764,27 +747,27 @@ body.no-scroll{
     background: transparent;
     border: 1.5px solid #fff;
 }
- 
+
 .sum-badges .ic i{
     line-height: 1;
 }
- 
+
 .sum-badges b{
     display: block;
     font-size: 15px;
     font-weight: 700;
 }
- 
+
 .sum-badges small{
     display: block;
     margin-top: 1px;
     font-size: 13px;
     opacity: 0.8;
 }
- 
- 
+
+
 /* ===== نموذج التعبئة: لوح شفاف بلون المنتج مثل نموذج الصورة ===== */
- 
+
 .order-form{
     position: relative;
     flex: 0 1 440px;
@@ -798,14 +781,14 @@ body.no-scroll{
         color-mix(in srgb, var(red) 20%, transparent);
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
 }
- 
+
 .order-form h2{
     text-align: center;
     font-size: 28px;
     font-weight: 500;
     margin-bottom: 22px;
 }
- 
+
 /* زر الإغلاق: علامة × مرسومة بالـ CSS في منتصف الدائرة تماماً */
 .order-close{
     position: absolute;
@@ -818,7 +801,7 @@ body.no-scroll{
     cursor: pointer;
     transition: background-color 0.3s;
 }
- 
+
 .order-close::before,
 .order-close::after{
     content: '';
@@ -830,27 +813,27 @@ body.no-scroll{
     border-radius: 2px;
     background: #fff;
 }
- 
+
 .order-close::before{ transform: translate(-50%, -50%) rotate(45deg); }
 .order-close::after{ transform: translate(-50%, -50%) rotate(-45deg); }
- 
+
 .order-close:hover{
     background: rgba(255, 255, 255, 0.35);
 }
- 
+
 .field{
     margin-bottom: 14px;
     flex: 1;
     min-width: 0;
 }
- 
+
 .field label{
     display: block;
     font-size: 14px;
     font-weight: 600;
     margin-bottom: 6px;
 }
- 
+
 .field > input,
 .field > select,
 .field > textarea{
@@ -864,13 +847,19 @@ body.no-scroll{
     outline: none;
     transition: border-color 0.3s, background-color 0.3s;
 }
- 
+
+/* كل الخانات بنفس الارتفاع (48px)، وخانة العنوان تكبر سطراً سطراً مع كتابة المستخدم (ronq.js) */
+.field > input{ height: 48px; }
+
 .field > textarea{
     display: block;
-    resize: vertical;
-    min-height: 84px;
+    resize: none;
+    height: 48px;
+    min-height: 48px;
     max-height: 200px;
-    line-height: 1.7;
+    padding-block: 11px;
+    line-height: 24px;
+    overflow-y: hidden;
 }
 
 .field > input::placeholder,
@@ -878,23 +867,23 @@ body.no-scroll{
 #x::placeholder{
     color: rgba(255, 255, 255, 0.55);
 }
- 
+
 .field > input:focus,
 .field > select:focus,
 .field > textarea:focus{
     border-color: #fff;
     background: rgba(255, 255, 255, 0.2);
 }
- 
+
 /* المحافظة ثم العنوان: كل خانة في سطر بعرض النموذج، بنفس شكل بقية الحقول */
 .field-row{ display: block; }
 .field-row > .field{ margin-bottom: 14px; }
 
 .field > select{
     display: block;
-    height: 42px;
+    height: 48px;
     padding-block: 0;
-    line-height: 40px;
+    line-height: 46px;
     padding-inline: 10px 30px;
     cursor: pointer;
     appearance: none;
@@ -911,30 +900,31 @@ body.no-scroll{
     background: var(--base);
     color: #fff;
 }
- 
+
 .field.invalid > input,
 .field.invalid > select,
 .field.invalid > textarea{
     border-color: #ff9b9b;
 }
- 
+
 .err{
     display: block;
     margin-top: 4px;
     font-size: 13px;
     color: #ffb3b3;
 }
- 
-/* إطار خانة الهاتف (يبنيه phone.js) */
+
+/* إطار خانة الهاتف (يبنيه phone.js): بنفس ارتفاع بقية الخانات */
+.phone-wrap{ height: 48px; }
 .phone-wrap:focus-within{
     box-shadow: 0 0 0 1px #fff;
 }
- 
+
 #x:-webkit-autofill{
     -webkit-text-fill-color: #fff;
     transition: background-color 9999s ease-in-out 0s;
 }
- 
+
 /* عداد الكمية: − و + مرسومتان بالـ CSS في منتصف الدائرة تماماً */
 .qty{
     display: inline-flex;
@@ -945,7 +935,7 @@ body.no-scroll{
     background: rgba(255, 255, 255, 0.12);
     border: 1px solid rgba(255, 255, 255, 0.3);
 }
- 
+
 .qty button{
     position: relative;
     width: 34px;
@@ -955,7 +945,7 @@ body.no-scroll{
     cursor: pointer;
     transition: background-color 0.3s, transform 0.2s;
 }
- 
+
 /* الخط الأفقي: موجود في الزرين (ناقص / زائد) */
 .qty button::before,
 .qty button.q-plus::after,
@@ -967,13 +957,13 @@ body.no-scroll{
     background: #fff;
     border-radius: 2px;
 }
- 
+
 .qty button::before{
     width: 14px;
     height: 2px;
     transform: translate(-50%, -50%);
 }
- 
+
 /* الخط العمودي: فقط في زر الزائد */
 .qty button.q-plus::after,
 #qtyPlus::after{
@@ -981,17 +971,17 @@ body.no-scroll{
     height: 14px;
     transform: translate(-50%, -50%);
 }
- 
+
 .qty button:hover{ background: rgba(255, 255, 255, 0.35); }
 .qty button:active{ transform: scale(0.9); }
- 
+
 .qty span{
     min-width: 40px;
     text-align: center;
     font-size: 18px;
     font-weight: 700;
 }
- 
+
 /* الإجمالي */
 .totals{
     margin: 16px 0;
@@ -999,7 +989,7 @@ body.no-scroll{
     border-radius: 12px;
     background: rgba(0, 0, 0, 0.22);
 }
- 
+
 .totals div{
     display: flex;
     justify-content: space-between;
@@ -1008,12 +998,12 @@ body.no-scroll{
     padding: 4px 0;
     font-size: 15px;
 }
- 
+
 .totals strong{
     font-size: 18px;
     font-weight: 700;
 }
- 
+
 .rate-note{
     margin: -6px 0 12px;
     text-align: center;
@@ -1033,9 +1023,9 @@ body.no-scroll{
     cursor: pointer;
     transition: transform 0.2s, opacity 0.3s;
 }
- 
+
 .order-submit:active{ transform: scale(0.97); }
- 
+
 .order-ok{
     margin-top: 12px;
     text-align: center;
@@ -1056,35 +1046,36 @@ body.no-scroll{
     cursor: wait;
 }
 
-.sms-fallback{
-    display: block;
-    margin-top: 10px;
-    text-align: center;
-    font-size: 14px;
-    font-weight: 600;
-    color: #fff;
-    text-decoration: underline;
-    opacity: 0.9;
-}
-.sms-fallback[hidden]{ display: none; }
- 
- 
+
+
 /* ===== التاب والجوال ===== */
- 
+
 @media (max-width: 900px){
     .order-page{ width: 92%; }
 }
- 
+
+/* شاشات الحاسوب القصيرة: نضغط النموذج قليلاً ليظهر أكبر جزء منه دون تمرير */
+@media (min-width: 801px) and (max-height: 860px){
+    .order-form{ padding: 28px 26px 22px; }
+    .order-form h2{ font-size: 24px; margin-bottom: 14px; }
+    .order-form .field{ margin-bottom: 10px; }
+    .order-form .field label{ margin-bottom: 4px; }
+    .totals{ margin: 12px 0; padding: 8px 14px; }
+    .rate-note{ margin: -4px 0 10px; }
+    .order-submit{ padding: 10px; font-size: 18px; }
+    .sum-img{ height: clamp(150px, 30vh, 220px); }
+}
+
 @media (max-width: 800px){
- 
+
     .order-box{ align-items: flex-start; }
- 
+
     .order-layout{
         flex-direction: column;
         align-items: stretch;
         gap: 16px;
     }
- 
+
     /* الملخص يصير شريطاً فوق النموذج */
     .order-summary{
         flex: none;
@@ -1097,11 +1088,11 @@ body.no-scroll{
         background: rgba(255, 255, 255, 0.07);
         border: 1px solid rgba(255, 255, 255, 0.12);
     }
- 
+
     .sum-img{ width: 108px; height: 108px; flex: none; padding-bottom: 0; }
     .sum-img::after{ display: none; }
     .sum-img img{ width: 108px; height: 108px; max-height: none; object-fit: contain; animation: none; }
- 
+
     .sum-info{ flex: 1; min-width: 0; }
     .sum-info h3{ font-size: 15px; margin-bottom: 4px; }
     .sum-price{ justify-content: flex-start; gap: 10px; }
@@ -1109,19 +1100,19 @@ body.no-scroll{
     .sum-old{ font-size: 15px; }
     .sum-ship{ display: none; }
     .sum-badges{ display: none; }
- 
+
     .order-form{
         flex: none;
         width: 100%;
         padding: 46px 18px 22px;
     }
- 
+
     .order-form h2{ font-size: 22px; }
 }
- 
- 
+
+
 /* ========== لودر إعادة تحميل الصفحة ========== */
- 
+
 .page-loader{
     position: fixed;
     inset: 0;
@@ -1134,16 +1125,16 @@ body.no-scroll{
     pointer-events: none;
     transition: opacity 0.35s ease, visibility 0s linear 0.35s;
 }
- 
+
 html.reloading .page-loader{
     opacity: 1;
     visibility: visible;
     pointer-events: auto;
     transition: opacity 0.35s ease, visibility 0s;
 }
- 
+
 html.reloading body{ overflow: hidden; }
- 
+
 .spinner{
     width: 58px;
     height: 58px;
@@ -1152,16 +1143,16 @@ html.reloading body{ overflow: hidden; }
     border-top-color: #fff;
     animation: spin 0.9s linear infinite;
 }
- 
+
 @keyframes spin{
     to{ transform: rotate(360deg); }
 }
- 
- 
+
+
 /* ========== شارة العرض (أعلى يمين المنتج) ========== */
- 
+
 .imgs{ position: relative; }
- 
+
 .offer-badge{
     position: absolute;
     top: 0;
@@ -1178,9 +1169,9 @@ html.reloading body{ overflow: hidden; }
     transform: rotate(6deg);
     animation: badgePulse 2.4s ease-in-out infinite;
 }
- 
+
 .offer-badge[hidden]{ display: none; }
- 
+
 .offer-badge .ob-label{
     display: block;
     font-size: 12px;
@@ -1188,26 +1179,26 @@ html.reloading body{ overflow: hidden; }
     letter-spacing: 0.5px;
     opacity: 0.8;
 }
- 
+
 .offer-badge .ob-text{
     display: block;
     font-size: 20px;
     font-weight: 800;
 }
- 
+
 @keyframes badgePulse{
     0%, 100%{ transform: rotate(6deg) scale(1); }
     50%     { transform: rotate(6deg) scale(1.07); }
 }
- 
+
 @media (max-width: 600px){
     .offer-badge{ padding: 6px 14px 8px; max-width: 140px; }
     .offer-badge .ob-text{ font-size: 17px; }
 }
- 
- 
+
+
 /* ========== حركة دخول الصفحة: المحتوى مخفي حتى تبدأ الحركة ========== */
- 
+
 html.intro-pending .text,
 html.intro-pending .maizat,
 html.intro-pending .imgs,
@@ -1217,9 +1208,9 @@ html.intro-pending .maizat > *,
 html.intro-pending .thelsafhaon > *{
     opacity: 0;
 }
- 
+
 html.intro-pending .text button{ animation: none; }
- 
+
 @media (prefers-reduced-motion: reduce){
     .spinner{ animation-duration: 2s; }
     .offer-badge{ animation: none; }
@@ -1244,8 +1235,7 @@ html.intro-pending .text button{ animation: none; }
 .shamelll.light .text p,
 .shamelll.light .alsaer,
 .shamelll.light .overlay ul li,
-.shamelll.light .tauasul a i,
-.shamelll.light .taosel p{
+.shamelll.light .tauasul a i{
     color: var(--ink);
 }
 
@@ -1290,7 +1280,7 @@ html.intro-pending .text button{ animation: none; }
 
 /* ========== معرض صور المنتج (نفس المنتج من زوايا مختلفة) ========== */
 
-.imgs{ --gal-h: 60px; }   /* مساحة صف الصور المصغّرة تحت المنتج */
+.imgs{ --gal-h: 84px; }   /* مساحة صف الصور المصغّرة تحت المنتج */
 
 /* عند وجود معرض: يزيد ارتفاع الصندوق بمقدار صف الصور المصغّرة، وصورة المنتج تبقى بحجمها كما هي */
 .imgs.has-gallery{
@@ -1313,6 +1303,7 @@ html.intro-pending .text button{ animation: none; }
     padding: 2px;
     overflow-x: auto;
     scrollbar-width: none;
+    transition: top 0.35s ease;
 }
 .gallery::-webkit-scrollbar{ display: none; }
 .gallery[hidden]{ display: none; }
@@ -1355,6 +1346,6 @@ html.intro-pending .text button{ animation: none; }
 }
 
 @media (max-width: 600px){
-    .imgs{ --gal-h: 54px; }
+    .imgs{ --gal-h: 76px; }
     .g-thumb{ width: 58px; height: 40px; }
 }
