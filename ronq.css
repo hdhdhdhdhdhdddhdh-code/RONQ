@@ -126,14 +126,12 @@ body{
 
 /* اليمين: النص — العمودان الجانبيان متساويان ليبقى المنتج في منتصف الشاشة أفقياً */
 .text{
-    /* flex: 1 1 0;
-    min-width: 0; */
-    width: 28%;
+    flex: 1 1 0;
+    min-width: 0;
 }
 .maizat{
-    /* flex: 1 1 0;
-    min-width: 0; */
-    width: 25%;
+    flex: 1 1 0;
+    min-width: 0;
 }
 
 .text h1{
@@ -1349,3 +1347,6 @@ html.intro-pending .text button{ animation: none; }
     .imgs{ --gal-h: 76px; }
     .g-thumb{ width: 58px; height: 40px; }
 }
+/* شعار X داخل أيقونات التواصل */
+.x-logo{ display:block; width:1em; height:1em; }
+.shamelll.light .tauasul a .x-logo{ color: var(--ink); }

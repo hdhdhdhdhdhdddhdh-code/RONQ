@@ -97,6 +97,7 @@ window.PRODUCTS = [];
     youtube:   { icon: 'bxl-youtube',   label: 'يوتيوب' },
     twitter:   { icon: 'bxl-twitter',   label: 'إكس (تويتر)' }
   };
+  const X_LOGO = '<svg class="x-logo" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>';
   const safeUrl = u => (/^https?:\/\/[^\s]+$/i.test(String(u || '').trim()) ? String(u).trim() : '');
   const safeImg = u => (/^(https?:\/\/|imgs\/)[^\s]+$/i.test(String(u || '').trim()) ? String(u).trim() : '');
   const color   = c => (/^#[0-9a-f]{6}$/i.test(String(c || '')) ? c : '');
@@ -126,6 +127,10 @@ window.PRODUCTS = [];
         a.target = '_blank';
         a.rel = 'noopener';
         a.setAttribute('aria-label', ICONS[x.id].label);
+        if (x.id === 'twitter') {            // شعار X (غير موجود في خط الأيقونات)
+          a.insertAdjacentHTML('beforeend', X_LOGO);
+          return a;
+        }
         const i = document.createElement('i');
         i.className = 'bx ' + ICONS[x.id].icon;
         a.append(i);
